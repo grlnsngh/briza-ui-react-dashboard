@@ -73,8 +73,8 @@ export default function Dashboard() {
         <div
           style={{
             padding: "1.5rem",
-            backgroundColor: "var(--color-info-light, #e3f2fd)",
-            borderLeft: "4px solid var(--color-info)",
+            backgroundColor: "var(--color-surface)",
+            border: "2px solid var(--color-info)",
             borderRadius: "var(--radius-md)",
             marginBottom: "2rem",
             display: "flex",
@@ -89,6 +89,7 @@ export default function Dashboard() {
                 margin: "0 0 0.5rem 0",
                 fontSize: "1rem",
                 fontWeight: "600",
+                color: "var(--color-text-primary)",
               }}
             >
               Getting Started
@@ -98,6 +99,7 @@ export default function Dashboard() {
                 margin: "0 0 0.75rem 0",
                 fontSize: "0.875rem",
                 lineHeight: "1.5",
+                color: "var(--color-text-secondary)",
               }}
             >
               Your dashboard is ready! To start monitoring components:
@@ -108,11 +110,15 @@ export default function Dashboard() {
                 paddingLeft: "1.25rem",
                 fontSize: "0.875rem",
                 lineHeight: "1.8",
+                color: "var(--color-text-secondary)",
               }}
             >
               <li>
-                Click the <strong>Monitoring</strong> button in the header to
-                enable real-time tracking
+                Click the{" "}
+                <strong style={{ color: "var(--color-text-primary)" }}>
+                  Monitoring
+                </strong>{" "}
+                button in the header to enable real-time tracking
               </li>
               <li>
                 Visit the{" "}
@@ -120,7 +126,7 @@ export default function Dashboard() {
                   to={ROUTES.SHOWCASE}
                   style={{
                     color: "var(--color-primary)",
-                    textDecoration: "none",
+                    textDecoration: "underline",
                     fontWeight: "600",
                   }}
                 >

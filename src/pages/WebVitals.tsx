@@ -76,11 +76,12 @@ export default function WebVitals() {
           <div
             style={{
               padding: "1rem",
-              backgroundColor: "var(--color-warning-light, #fff3cd)",
-              borderLeft: "4px solid var(--color-warning)",
+              backgroundColor: "var(--color-surface)",
+              border: "2px solid var(--color-warning)",
               borderRadius: "var(--radius-md)",
               fontSize: "0.875rem",
               marginBottom: "1rem",
+              color: "var(--color-text-primary)",
             }}
           >
             ⚠️ Monitoring is disabled. Click the <strong>Monitoring</strong>{" "}
@@ -92,14 +93,15 @@ export default function WebVitals() {
           <div
             style={{
               padding: "1rem",
-              backgroundColor: "var(--color-info-light, #e3f2fd)",
-              borderLeft: "4px solid var(--color-info)",
+              backgroundColor: "var(--color-surface)",
+              border: "2px solid var(--color-info)",
               borderRadius: "var(--radius-md)",
               fontSize: "0.875rem",
               marginBottom: "1rem",
               display: "flex",
               alignItems: "center",
               gap: "0.75rem",
+              color: "var(--color-text-primary)",
             }}
           >
             <span
@@ -629,14 +631,22 @@ export default function WebVitals() {
             style={{
               marginTop: "1rem",
               padding: "1rem",
-              backgroundColor: "var(--color-info-light, #e3f2fd)",
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
               borderRadius: "var(--radius-md)",
               fontSize: "0.875rem",
+              color: "var(--color-text-primary)",
             }}
           >
             💡 <strong>Tip:</strong> Some metrics may take a few seconds to
             appear. Try:
-            <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.5rem" }}>
+            <ul
+              style={{
+                margin: "0.5rem 0 0",
+                paddingLeft: "1.5rem",
+                color: "var(--color-text-secondary)",
+              }}
+            >
               <li>Scrolling the page (helps with LCP)</li>
               <li>Clicking buttons or links (required for INP)</li>
               <li>Waiting 5-10 seconds for full data collection</li>

@@ -23,6 +23,8 @@ Welcome to the Briza UI Performance Dashboard documentation!
 - **[Showcase Blank Page Fix](SHOWCASE_BLANK_PAGE_FIX.md)** - Troubleshooting guide
 - **[Dashboard Loading States](DASHBOARD_LOADING_STATES.md)** - Loading indicators and user guidance
 - **[Web Vitals Loading States](WEB_VITALS_LOADING_STATES.md)** - Web Vitals page improvements
+- **[UI Improvements - Dark Theme](UI_IMPROVEMENTS_DARK_THEME.md)** - Dark mode contrast and visual polish
+- **[UI Quick Guide](UI_IMPROVEMENTS_QUICK_GUIDE.md)** - Quick reference for UI changes
 
 ### 🚀 Deployment
 

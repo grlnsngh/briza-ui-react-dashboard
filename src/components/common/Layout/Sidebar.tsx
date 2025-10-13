@@ -67,13 +67,15 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               <span className={styles.statValue}>{avgScore.toFixed(1)}</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statLabel}>Status</span>
-              <span
-                className={`${styles.statusIndicator} ${
-                  state.dashboard.isRealTimeEnabled ? styles.active : ""
-                }`}
-              >
-                {state.dashboard.isRealTimeEnabled ? "● Active" : "○ Inactive"}
+              <span className={styles.statLabel}>
+                {state.webVitals ? "Web Vitals" : "Monitoring"}
+              </span>
+              <span className={styles.statValue}>
+                {state.webVitals && state.webVitals.overallScore > 0
+                  ? state.webVitals.overallScore.toFixed(0)
+                  : state.dashboard.isRealTimeEnabled
+                  ? "Active"
+                  : "Paused"}
               </span>
             </div>
           </div>
