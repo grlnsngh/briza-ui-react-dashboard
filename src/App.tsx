@@ -23,7 +23,7 @@ import { Layout, Loading } from "./components";
 
 // Lazy load page components for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const BrizaShowcase = lazy(() => import("./pages/BrizaShowcaseSimple")); // Using simple version to debug
+const BrizaShowcase = lazy(() => import("./pages/BrizaShowcase")); // Full version with monitoring
 const ComponentMonitor = lazy(() => import("./pages/ComponentMonitor"));
 const BundleAnalyzer = lazy(() => import("./pages/BundleAnalyzer"));
 const WebVitals = lazy(() => import("./pages/WebVitals"));

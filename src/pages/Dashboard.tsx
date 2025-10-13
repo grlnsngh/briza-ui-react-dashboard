@@ -5,11 +5,15 @@
  */
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { usePerformanceContext } from "../contexts";
 import { formatNumber } from "../utils";
 import { ROUTES } from "../utils/constants";
-import { LoadingSkeleton } from "../components/common";
+import {
+  LoadingSkeleton,
+  DemoModeToggle,
+  EmptyState,
+} from "../components/common";
 
 export default function Dashboard() {
   const { state } = usePerformanceContext();
@@ -50,95 +54,60 @@ export default function Dashboard() {
     }
   }, [state.webVitals, state.dashboard.isRealTimeEnabled]);
 
+  const navigate = useNavigate();
+
   return (
     <div style={{ padding: "2rem" }}>
-      <header style={{ marginBottom: "2rem" }}>
-        <h1
-          style={{
-            fontSize: "2rem",
-            fontWeight: "700",
-            marginBottom: "0.5rem",
-          }}
-        >
-          Briza UI Performance Dashboard
-        </h1>
-        <p style={{ color: "var(--color-text-secondary)" }}>
-          Real-time performance monitoring and analytics for briza-ui-react
-          component library
-        </p>
+      <header
+        style={{
+          marginBottom: "2rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "2rem",
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <h1
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Briza UI Performance Dashboard
+          </h1>
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Real-time performance monitoring and analytics for briza-ui-react
+            component library
+          </p>
+        </div>
+        <DemoModeToggle />
       </header>
 
-      {/* Getting Started Banner - Show when no data */}
-      {totalComponents === 0 && isInitialLoad && (
-        <div
-          style={{
-            padding: "1.5rem",
-            backgroundColor: "var(--color-surface)",
-            border: "2px solid var(--color-info)",
-            borderRadius: "var(--radius-md)",
-            marginBottom: "2rem",
-            display: "flex",
-            alignItems: "start",
-            gap: "1rem",
+      {/* Empty State - Show when no data */}
+      {totalComponents === 0 && !isInitialLoad && !state.isDemoMode && (
+        <EmptyState
+          icon="📊"
+          title="No Components Monitored Yet"
+          description="Start monitoring Briza UI components to see real-time performance metrics, Web Vitals scores, and detailed analytics. Visit the Component Showcase page to interact with components, or enable Demo Mode to see sample data."
+          actionLabel="Go to Showcase"
+          onAction={() => navigate(ROUTES.SHOWCASE)}
+          secondaryActionLabel="Enable Demo Mode"
+          onSecondaryAction={() => {
+            // Demo mode toggle will handle this
+            const demoToggle = document.querySelector(
+              '[aria-label*="Demo Mode"]'
+            ) as HTMLButtonElement;
+            demoToggle?.click();
           }}
-        >
-          <div style={{ fontSize: "1.5rem" }}>ℹ️</div>
-          <div style={{ flex: 1 }}>
-            <h3
-              style={{
-                margin: "0 0 0.5rem 0",
-                fontSize: "1rem",
-                fontWeight: "600",
-                color: "var(--color-text-primary)",
-              }}
-            >
-              Getting Started
-            </h3>
-            <p
-              style={{
-                margin: "0 0 0.75rem 0",
-                fontSize: "0.875rem",
-                lineHeight: "1.5",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              Your dashboard is ready! To start monitoring components:
-            </p>
-            <ol
-              style={{
-                margin: 0,
-                paddingLeft: "1.25rem",
-                fontSize: "0.875rem",
-                lineHeight: "1.8",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              <li>
-                Click the{" "}
-                <strong style={{ color: "var(--color-text-primary)" }}>
-                  Monitoring
-                </strong>{" "}
-                button in the header to enable real-time tracking
-              </li>
-              <li>
-                Visit the{" "}
-                <Link
-                  to={ROUTES.SHOWCASE}
-                  style={{
-                    color: "var(--color-primary)",
-                    textDecoration: "underline",
-                    fontWeight: "600",
-                  }}
-                >
-                  Showcase page
-                </Link>{" "}
-                to interact with Briza UI components
-              </li>
-              <li>
-                Return here to see performance metrics and Web Vitals scores
-              </li>
-            </ol>
-          </div>
+        />
+      )}
+
+      {/* Loading State during initial load */}
+      {totalComponents === 0 && isInitialLoad && !state.isDemoMode && (
+        <div style={{ marginBottom: "2rem" }}>
+          <LoadingSkeleton height="200px" />
         </div>
       )}
 
