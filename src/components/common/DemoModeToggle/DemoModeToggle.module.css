@@ -1,0 +1,155 @@
+/* DemoModeToggle.module.css */
+
+.container {
+  position: fixed;
+  bottom: var(--spacing-4);
+  right: var(--spacing-4);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  align-items: flex-end;
+}
+
+.badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-lg);
+  animation: pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.badge.active {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.toggleButton {
+  background: var(--background-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--text-primary);
+}
+
+.toggleButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.toggleButton.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.toggleButton:active {
+  transform: translateY(0);
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.dropdown {
+  background: var(--background-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-2);
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdownItem:hover {
+  background: var(--background-secondary);
+}
+
+.dropdownItem.danger {
+  color: var(--color-error);
+}
+
+.dropdownItem.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: var(--spacing-2) 0;
+}
+
+.stats {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-1);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    bottom: var(--spacing-3);
+    right: var(--spacing-3);
+  }
+
+  .badge {
+    font-size: 0.625rem;
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  .toggleButton {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: 0.75rem;
+  }
+
+  .dropdown {
+    right: 0;
+  }
+}

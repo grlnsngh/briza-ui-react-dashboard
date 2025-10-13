@@ -47,6 +47,8 @@ interface PerformanceState {
   dashboard: DashboardState;
   /** Raw performance measurements */
   measurements: PerformanceMeasurement[];
+  /** Demo mode enabled */
+  isDemoMode: boolean;
 }
 
 // =============================================================================
@@ -63,7 +65,9 @@ type PerformanceAction =
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null }
   | { type: "CLEAR_METRICS" }
-  | { type: "RESET_STATE" };
+  | { type: "RESET_STATE" }
+  | { type: "LOAD_MOCK_DATA"; payload: ComponentPerformanceMetrics[] }
+  | { type: "TOGGLE_DEMO_MODE"; payload: boolean };
 
 // =============================================================================
 // REDUCER
@@ -91,6 +95,7 @@ const initialState: PerformanceState = {
   webVitals: null,
   dashboard: initialDashboard,
   measurements: [],
+  isDemoMode: false,
 };
 
 function performanceReducer(
@@ -187,6 +192,29 @@ function performanceReducer(
     case "RESET_STATE":
       return initialState;
 
+    case "LOAD_MOCK_DATA": {
+      const newMetrics = new Map(state.componentMetrics);
+      action.payload.forEach((metric) => {
+        newMetrics.set(metric.componentName, metric);
+      });
+      return {
+        ...state,
+        componentMetrics: newMetrics,
+        isDemoMode: true,
+        dashboard: {
+          ...state.dashboard,
+          lastUpdate: Date.now(),
+        },
+      };
+    }
+
+    case "TOGGLE_DEMO_MODE":
+      return {
+        ...state,
+        isDemoMode: action.payload,
+        componentMetrics: action.payload ? state.componentMetrics : new Map(),
+      };
+
     default:
       return state;
   }
@@ -225,6 +253,10 @@ interface PerformanceContextValue {
   ) => ComponentPerformanceMetrics | undefined;
   /** Get filtered components */
   getFilteredComponents: () => ComponentPerformanceMetrics[];
+  /** Load mock data for demo */
+  loadMockData: (data: ComponentPerformanceMetrics[]) => void;
+  /** Toggle demo mode */
+  toggleDemoMode: (enabled: boolean) => void;
 }
 
 const PerformanceContext = createContext<PerformanceContextValue | undefined>(
@@ -284,6 +316,14 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
 
   const resetState = useCallback(() => {
     dispatch({ type: "RESET_STATE" });
+  }, []);
+
+  const loadMockData = useCallback((data: ComponentPerformanceMetrics[]) => {
+    dispatch({ type: "LOAD_MOCK_DATA", payload: data });
+  }, []);
+
+  const toggleDemoMode = useCallback((enabled: boolean) => {
+    dispatch({ type: "TOGGLE_DEMO_MODE", payload: enabled });
   }, []);
 
   // Selectors
@@ -370,6 +410,8 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
       resetState,
       getComponentMetric,
       getFilteredComponents,
+      loadMockData,
+      toggleDemoMode,
     }),
     [
       state,
@@ -385,6 +427,8 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
       resetState,
       getComponentMetric,
       getFilteredComponents,
+      loadMockData,
+      toggleDemoMode,
     ]
   );
 

@@ -17,6 +17,7 @@ interface HeaderProps {
 
 const routeLabels: Record<string, string> = {
   [ROUTES.DASHBOARD]: "Dashboard",
+  [ROUTES.SHOWCASE]: "Component Showcase",
   [ROUTES.COMPONENT_MONITOR]: "Component Monitor",
   [ROUTES.BUNDLE_ANALYZER]: "Bundle Analyzer",
   [ROUTES.WEB_VITALS]: "Web Vitals",

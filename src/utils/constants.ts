@@ -188,6 +188,7 @@ export const BRIZA_COMPONENTS = [
 export const ROUTES = {
   HOME: "/",
   DASHBOARD: "/dashboard",
+  SHOWCASE: "/showcase",
   COMPONENT_MONITOR: "/component-monitor",
   BUNDLE_ANALYZER: "/bundle-analyzer",
   WEB_VITALS: "/web-vitals",

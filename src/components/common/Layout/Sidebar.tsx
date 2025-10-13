@@ -23,6 +23,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: ROUTES.DASHBOARD, label: "Dashboard", icon: "📊" },
+  { path: ROUTES.SHOWCASE, label: "Component Showcase", icon: "🎭" },
   { path: ROUTES.COMPONENT_MONITOR, label: "Component Monitor", icon: "⚛️" },
   { path: ROUTES.BUNDLE_ANALYZER, label: "Bundle Analyzer", icon: "📦" },
   { path: ROUTES.WEB_VITALS, label: "Web Vitals", icon: "⚡" },

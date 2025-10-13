@@ -23,6 +23,7 @@ import { Layout, Loading } from "./components";
 
 // Lazy load page components for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const BrizaShowcase = lazy(() => import("./pages/BrizaShowcaseSimple")); // Using simple version to debug
 const ComponentMonitor = lazy(() => import("./pages/ComponentMonitor"));
 const BundleAnalyzer = lazy(() => import("./pages/BundleAnalyzer"));
 const WebVitals = lazy(() => import("./pages/WebVitals"));
@@ -43,6 +44,7 @@ function App() {
         <Routes>
           <Route path={ROUTES.HOME} element={<Dashboard />} />
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+          <Route path={ROUTES.SHOWCASE} element={<BrizaShowcase />} />
           <Route
             path={ROUTES.COMPONENT_MONITOR}
             element={<ComponentMonitor />}
