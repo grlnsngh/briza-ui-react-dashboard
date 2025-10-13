@@ -1,0 +1,303 @@
+/* ThemePerformance.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-2);
+}
+
+.stats {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.statCard {
+  padding: var(--spacing-4);
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  min-width: 160px;
+}
+
+.statLabel {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: var(--spacing-2);
+}
+
+.statValue {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Sections */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Charts */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.chartCard {
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-6);
+}
+
+.chartTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+/* Approaches */
+.approachesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.approachCard {
+  padding: var(--spacing-5);
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.approachCard:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.approachCard.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.approachHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.approachName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.ratingBadge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: var(--background-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-4);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.metricLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.metricValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border-color);
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.detailTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.detailList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.detailList li {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Best Practices */
+.practicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.practiceCard {
+  padding: var(--spacing-5);
+  background: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  transition: all var(--transition-fast);
+}
+
+.practiceCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.practiceIcon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-2);
+}
+
+.practiceTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.practiceDescription {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.impactBadge {
+  align-self: flex-start;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .stats {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .statCard {
+    width: 100%;
+  }
+
+  .approachesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .practicesGrid {
+    grid-template-columns: 1fr;
+  }
+}
