@@ -9,6 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { usePerformanceContext } from "../contexts";
 import { formatNumber } from "../utils";
 import { ROUTES } from "../utils/constants";
+import { generateMockComponentData } from "../utils/mockData";
 import {
   LoadingSkeleton,
   DemoModeToggle,
@@ -16,9 +17,10 @@ import {
 } from "../components/common";
 
 export default function Dashboard() {
-  const { state } = usePerformanceContext();
+  const { state, toggleDemoMode, loadMockData } = usePerformanceContext();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [webVitalsLoading, setWebVitalsLoading] = useState(true);
+  const navigate = useNavigate();
 
   const totalComponents = state.componentMetrics.size;
   const avgScore =
@@ -53,8 +55,6 @@ export default function Dashboard() {
       setWebVitalsLoading(false);
     }
   }, [state.webVitals, state.dashboard.isRealTimeEnabled]);
-
-  const navigate = useNavigate();
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -95,11 +95,10 @@ export default function Dashboard() {
           onAction={() => navigate(ROUTES.SHOWCASE)}
           secondaryActionLabel="Enable Demo Mode"
           onSecondaryAction={() => {
-            // Demo mode toggle will handle this
-            const demoToggle = document.querySelector(
-              '[aria-label*="Demo Mode"]'
-            ) as HTMLButtonElement;
-            demoToggle?.click();
+            // Enable demo mode and load mock data
+            toggleDemoMode(true);
+            const mockData = generateMockComponentData();
+            loadMockData(mockData);
           }}
         />
       )}

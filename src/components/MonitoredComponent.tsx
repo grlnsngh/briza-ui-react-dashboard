@@ -5,7 +5,13 @@
  * performance metrics without requiring manual hook usage.
  */
 
-import { Profiler, type ProfilerOnRenderCallback, type ReactNode } from "react";
+import {
+  Profiler,
+  type ProfilerOnRenderCallback,
+  type ReactNode,
+  useRef,
+  useCallback,
+} from "react";
 import { usePerformanceContext } from "../contexts";
 import type { ComponentPerformanceMetrics } from "../types/performance";
 
@@ -26,21 +32,36 @@ export function MonitoredComponent({
   children,
   enabled = true,
 }: MonitoredComponentProps) {
-  let updateComponentMetric;
-  let state;
+  // Always call hooks at the top level
+  const context = usePerformanceContext();
+  const { updateComponentMetric, state } = context;
 
-  try {
-    const context = usePerformanceContext();
-    updateComponentMetric = context.updateComponentMetric;
-    state = context.state;
-  } catch (error) {
-    console.error(
-      "MonitoredComponent: Failed to get PerformanceContext",
-      error
-    );
-    // If context is not available, just render children without monitoring
-    return <>{children}</>;
-  }
+  // Use ref to debounce updates and prevent infinite loops
+  const updateTimerRef = useRef<number | null>(null);
+  const localMetricsRef = useRef<Map<string, ComponentPerformanceMetrics>>(
+    new Map()
+  );
+
+  // Debounced update function to batch metric updates
+  const debouncedUpdate = useCallback(
+    (metric: ComponentPerformanceMetrics) => {
+      // Store metric locally first
+      localMetricsRef.current.set(metric.componentName, metric);
+
+      // Clear existing timer
+      if (updateTimerRef.current) {
+        window.clearTimeout(updateTimerRef.current);
+      }
+
+      // Batch update after 100ms of no new renders
+      updateTimerRef.current = window.setTimeout(() => {
+        const metricsToUpdate = Array.from(localMetricsRef.current.values());
+        metricsToUpdate.forEach((m) => updateComponentMetric(m));
+        localMetricsRef.current.clear();
+      }, 100);
+    },
+    [updateComponentMetric]
+  );
 
   const onRenderCallback: ProfilerOnRenderCallback = (
     id,
@@ -50,7 +71,7 @@ export function MonitoredComponent({
     startTime,
     commitTime
   ) => {
-    if (!enabled || !updateComponentMetric || !state) return;
+    if (!enabled) return;
 
     // Get existing data or create new
     const currentMetric = state.componentMetrics.get(id) || {
@@ -113,8 +134,8 @@ export function MonitoredComponent({
       isTracking: true,
     };
 
-    // Update context
-    updateComponentMetric(updatedMetric);
+    // Use debounced update to prevent infinite render loops
+    debouncedUpdate(updatedMetric);
   };
 
   return (
