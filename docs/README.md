@@ -21,6 +21,8 @@ Welcome to the Briza UI Performance Dashboard documentation!
 - **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - What's been built
 - **[Project Completion Summary](PROJECT_COMPLETION_SUMMARY.md)** - Full project status
 - **[Showcase Blank Page Fix](SHOWCASE_BLANK_PAGE_FIX.md)** - Troubleshooting guide
+- **[Dashboard Loading States](DASHBOARD_LOADING_STATES.md)** - Loading indicators and user guidance
+- **[Web Vitals Loading States](WEB_VITALS_LOADING_STATES.md)** - Web Vitals page improvements
 
 ### 🚀 Deployment
 
@@ -43,6 +45,8 @@ Welcome to the Briza UI Performance Dashboard documentation!
 - **Deploy the dashboard** → [Deployment Guide](DEPLOYMENT_GUIDE.md)
 - **Use for portfolio** → [Portfolio Highlights](PORTFOLIO_HIGHLIGHTS.md)
 - **Fix blank page issue** → [Showcase Blank Page Fix](SHOWCASE_BLANK_PAGE_FIX.md)
+- **Understand loading states** → [Dashboard Loading States](DASHBOARD_LOADING_STATES.md)
+- **Fix Web Vitals not showing** → [Web Vitals Loading States](WEB_VITALS_LOADING_STATES.md)
 - **See future features** → [Improvement Roadmap](IMPROVEMENT_ROADMAP.md)
 
 ---
