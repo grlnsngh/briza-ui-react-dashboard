@@ -322,21 +322,7 @@ export default function BrizaShowcaseEnhanced() {
           </div>
         </MonitoredComponent>
 
-        {/* 11. Badge */}
-        <MonitoredComponent name="Briza-Badge">
-          <div className={styles.componentCard}>
-            <h3 className={styles.componentTitle}>Badge</h3>
-            <p className={styles.componentDesc}>Notification indicator</p>
-            <div className={styles.componentDemo}>
-              <span className={styles.badge}>New</span>
-              <span className={`${styles.badge} ${styles.badgeSuccess}`}>
-                {buttonClicks}
-              </span>
-            </div>
-          </div>
-        </MonitoredComponent>
-
-        {/* 12. Avatar */}
+        {/* 11. Avatar */}
         <MonitoredComponent name="Briza-Avatar">
           <div className={styles.componentCard}>
             <h3 className={styles.componentTitle}>Avatar</h3>
@@ -348,7 +334,7 @@ export default function BrizaShowcaseEnhanced() {
           </div>
         </MonitoredComponent>
 
-        {/* 13. Tooltip */}
+        {/* 12. Tooltip */}
         <MonitoredComponent name="Briza-Tooltip">
           <div className={styles.componentCard}>
             <h3 className={styles.componentTitle}>Tooltip</h3>
@@ -515,20 +501,7 @@ export default function BrizaShowcaseEnhanced() {
           </div>
         </MonitoredComponent>
 
-        {/* 23. Divider */}
-        <MonitoredComponent name="Briza-Divider">
-          <div className={styles.componentCard}>
-            <h3 className={styles.componentTitle}>Divider</h3>
-            <p className={styles.componentDesc}>Content separator</p>
-            <div className={styles.componentDemo}>
-              <div>Content above</div>
-              <hr className={styles.divider} />
-              <div>Content below</div>
-            </div>
-          </div>
-        </MonitoredComponent>
-
-        {/* 24. Table */}
+        {/* 22. Table */}
         <MonitoredComponent name="Briza-Table">
           <div className={styles.componentCard}>
             <h3 className={styles.componentTitle}>Table</h3>
