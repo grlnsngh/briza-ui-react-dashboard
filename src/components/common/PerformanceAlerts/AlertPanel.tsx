@@ -96,34 +96,23 @@ export function AlertPanel({
       >
         {/* Header */}
         <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <h2 className={styles.title}>Performance Alerts</h2>
-            <span className={styles.count}>
-              {activeAlerts.length} active
+          <div className={styles.headerLeft}>
+            <h2 className={styles.title}>Alerts</h2>
+            <div className={styles.badges}>
+              <span className={styles.activeBadge}>{activeAlerts.length}</span>
               {dismissedCount > 0 && (
-                <span className={styles.dismissedCount}>
-                  {" "}
-                  · {dismissedCount} dismissed
-                </span>
+                <span className={styles.dismissedBadge}>{dismissedCount}</span>
               )}
-            </span>
+            </div>
           </div>
+
           <div className={styles.headerActions}>
             {activeAlerts.length > 0 && (
               <button
-                className={styles.dismissAllButton}
+                className={styles.actionButton}
                 onClick={onDismissAll}
                 aria-label="Dismiss all alerts"
-              >
-                Dismiss All
-              </button>
-            )}
-            {dismissedCount > 0 && onClearDismissed && (
-              <button
-                className={styles.clearDismissedButton}
-                onClick={onClearDismissed}
-                aria-label="Clear dismissed alerts history"
-                title="Remove all dismissed alerts from history"
+                title="Dismiss all active alerts"
               >
                 <svg
                   width="16"
@@ -131,7 +120,30 @@ export function AlertPanel({
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  style={{ marginRight: "0.5rem" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className={styles.actionLabel}>Dismiss All</span>
+              </button>
+            )}
+            {dismissedCount > 0 && onClearDismissed && (
+              <button
+                className={`${styles.actionButton} ${styles.clearButton}`}
+                onClick={onClearDismissed}
+                aria-label="Clear dismissed alerts history"
+                title="Clear dismissed history"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
                     strokeLinecap="round"
@@ -140,7 +152,7 @@ export function AlertPanel({
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                   />
                 </svg>
-                Clear History ({dismissedCount})
+                <span className={styles.actionLabel}>Clear</span>
               </button>
             )}
             <button
