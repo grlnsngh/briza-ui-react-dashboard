@@ -1,0 +1,99 @@
+/* Alert Bell Button Styles */
+
+.alertBell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.alertBell:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.alertBell:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.alertBell.error {
+  color: var(--color-error);
+}
+
+.alertBell.warning {
+  color: var(--color-warning);
+}
+
+.alertBell.info {
+  color: var(--color-info);
+}
+
+.bellIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.badge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: white;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.badge.error {
+  background: var(--color-error);
+}
+
+.badge.warning {
+  background: var(--color-warning);
+}
+
+.badge.info {
+  background: var(--color-info);
+}
+
+/* Pulse animation for critical errors */
+.pulse {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  opacity: 0.4;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}

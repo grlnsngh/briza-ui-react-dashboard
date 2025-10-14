@@ -7,7 +7,7 @@
 
 import { useState, type ReactNode } from "react";
 import { usePerformanceAlerts } from "../../../hooks";
-import { PerformanceAlerts } from "../PerformanceAlerts";
+import { AlertPanel } from "../PerformanceAlerts";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import styles from "./Layout.module.css";
@@ -18,6 +18,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [alertPanelOpen, setAlertPanelOpen] = useState(false);
 
   // Performance alerts
   const { activeAlerts, dismissAlert, dismissAll } = usePerformanceAlerts({
@@ -29,6 +30,14 @@ export default function Layout({ children }: LayoutProps) {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const openAlertPanel = () => {
+    setAlertPanelOpen(true);
+  };
+
+  const closeAlertPanel = () => {
+    setAlertPanelOpen(false);
+  };
+
   return (
     <div className={styles.layout}>
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
@@ -38,17 +47,23 @@ export default function Layout({ children }: LayoutProps) {
           !sidebarOpen ? styles.sidebarClosed : ""
         }`}
       >
-        <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+        <Header
+          onToggleSidebar={toggleSidebar}
+          sidebarOpen={sidebarOpen}
+          alertCount={activeAlerts.length}
+          onOpenAlerts={openAlertPanel}
+        />
 
         <main className={styles.content}>{children}</main>
       </div>
 
-      {/* Performance Alerts */}
-      <PerformanceAlerts
+      {/* Alert Panel */}
+      <AlertPanel
         alerts={activeAlerts}
+        isOpen={alertPanelOpen}
+        onClose={closeAlertPanel}
         onDismiss={dismissAlert}
         onDismissAll={dismissAll}
-        maxVisible={5}
       />
     </div>
   );
