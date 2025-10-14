@@ -173,6 +173,16 @@
   color: var(--color-error);
 }
 
+.alertBell.noAlerts {
+  color: var(--text-tertiary);
+  opacity: 0.7;
+}
+
+.alertBell.noAlerts:hover {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
 .alertBell:active {
   transform: scale(0.95);
 }

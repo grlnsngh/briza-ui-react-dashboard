@@ -76,6 +76,13 @@
   background: var(--color-bg-tertiary);
   color: var(--color-text-secondary);
   border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dismissedCount {
+  opacity: 0.7;
 }
 
 .headerActions {
@@ -124,6 +131,48 @@
 .closeButton:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Filter Bar */
+.filterBar {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
+}
+
+.filterButton.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.filterButton.active:hover {
+  background: var(--color-primary-dark);
+}
+
+.filterButton svg {
+  flex-shrink: 0;
 }
 
 /* Content */
@@ -266,6 +315,17 @@
   );
 }
 
+/* Dismissed alert styling */
+.alertCard.dismissed {
+  opacity: 0.6;
+  border-left-color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary);
+}
+
+.alertCard.dismissed:hover {
+  opacity: 0.8;
+}
+
 .alertCardContent {
   flex: 1;
   min-width: 0;
@@ -285,6 +345,17 @@
   color: var(--color-text-primary);
   margin: 0;
   line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dismissedLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  font-style: italic;
 }
 
 .componentName {

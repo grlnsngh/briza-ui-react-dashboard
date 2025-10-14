@@ -4,7 +4,7 @@
  * Slide-out panel that displays all performance alerts
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PerformanceAlert } from "../../../types/alerts";
 import styles from "./AlertPanel.module.css";
 
@@ -24,6 +24,7 @@ export function AlertPanel({
   onDismissAll,
 }: AlertPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [showDismissed, setShowDismissed] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
@@ -66,9 +67,17 @@ export function AlertPanel({
 
   if (!isOpen) return null;
 
-  const errorAlerts = alerts.filter((a) => a.severity === "error");
-  const warningAlerts = alerts.filter((a) => a.severity === "warning");
-  const infoAlerts = alerts.filter((a) => a.severity === "info");
+  // Filter alerts based on showDismissed toggle
+  const visibleAlerts = showDismissed
+    ? alerts
+    : alerts.filter((a) => !a.dismissed);
+
+  const activeAlerts = alerts.filter((a) => !a.dismissed);
+  const dismissedCount = alerts.length - activeAlerts.length;
+
+  const errorAlerts = visibleAlerts.filter((a) => a.severity === "error");
+  const warningAlerts = visibleAlerts.filter((a) => a.severity === "warning");
+  const infoAlerts = visibleAlerts.filter((a) => a.severity === "info");
 
   return (
     <>
@@ -88,11 +97,17 @@ export function AlertPanel({
           <div className={styles.headerContent}>
             <h2 className={styles.title}>Performance Alerts</h2>
             <span className={styles.count}>
-              {alerts.length} alert{alerts.length !== 1 ? "s" : ""}
+              {activeAlerts.length} active
+              {dismissedCount > 0 && (
+                <span className={styles.dismissedCount}>
+                  {" "}
+                  · {dismissedCount} dismissed
+                </span>
+              )}
             </span>
           </div>
           <div className={styles.headerActions}>
-            {alerts.length > 0 && (
+            {activeAlerts.length > 0 && (
               <button
                 className={styles.dismissAllButton}
                 onClick={onDismissAll}
@@ -124,9 +139,53 @@ export function AlertPanel({
           </div>
         </div>
 
+        {/* Filter Toggle */}
+        {dismissedCount > 0 && (
+          <div className={styles.filterBar}>
+            <button
+              className={`${styles.filterButton} ${
+                showDismissed ? styles.active : ""
+              }`}
+              onClick={() => setShowDismissed(!showDismissed)}
+              aria-label={
+                showDismissed
+                  ? "Hide dismissed alerts"
+                  : "Show dismissed alerts"
+              }
+            >
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {showDismissed ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                )}
+              </svg>
+              <span>
+                {showDismissed ? "Hide" : "Show"} dismissed ({dismissedCount})
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Alert List */}
         <div className={styles.content}>
-          {alerts.length === 0 ? (
+          {visibleAlerts.length === 0 ? (
             <div className={styles.emptyState}>
               <svg
                 className={styles.emptyIcon}
@@ -141,9 +200,17 @@ export function AlertPanel({
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3 className={styles.emptyTitle}>All Clear!</h3>
+              <h3 className={styles.emptyTitle}>
+                {activeAlerts.length === 0 ? "All Clear!" : "No Alerts to Show"}
+              </h3>
               <p className={styles.emptyMessage}>
-                No performance issues detected at the moment.
+                {activeAlerts.length === 0
+                  ? "No performance issues detected. Your application is running smoothly!"
+                  : dismissedCount > 0 && !showDismissed
+                  ? `All active alerts dismissed. Click "Show dismissed" above to review ${dismissedCount} dismissed alert${
+                      dismissedCount !== 1 ? "s" : ""
+                    }.`
+                  : "No alerts match the current filter."}
               </p>
             </div>
           ) : (
@@ -234,10 +301,19 @@ interface AlertCardProps {
 
 function AlertCard({ alert, onDismiss }: AlertCardProps) {
   return (
-    <div className={`${styles.alertCard} ${styles[alert.severity]}`}>
+    <div
+      className={`${styles.alertCard} ${styles[alert.severity]} ${
+        alert.dismissed ? styles.dismissed : ""
+      }`}
+    >
       <div className={styles.alertCardContent}>
         <div className={styles.alertCardHeader}>
-          <h4 className={styles.alertTitle}>{alert.title}</h4>
+          <h4 className={styles.alertTitle}>
+            {alert.title}
+            {alert.dismissed && (
+              <span className={styles.dismissedLabel}>(Dismissed)</span>
+            )}
+          </h4>
           {alert.componentName && (
             <span className={styles.componentName}>{alert.componentName}</span>
           )}
@@ -262,26 +338,28 @@ function AlertCard({ alert, onDismiss }: AlertCardProps) {
           </span>
         </div>
       </div>
-      <button
-        className={styles.dismissButton}
-        onClick={() => onDismiss(alert.id)}
-        aria-label="Dismiss alert"
-      >
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+      {!alert.dismissed && (
+        <button
+          className={styles.dismissButton}
+          onClick={() => onDismiss(alert.id)}
+          aria-label="Dismiss alert"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

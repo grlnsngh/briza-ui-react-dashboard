@@ -21,10 +21,11 @@ export default function Layout({ children }: LayoutProps) {
   const [alertPanelOpen, setAlertPanelOpen] = useState(false);
 
   // Performance alerts
-  const { activeAlerts, dismissAlert, dismissAll } = usePerformanceAlerts({
-    checkInterval: 5000, // Check every 5 seconds
-    enabled: true,
-  });
+  const { alerts, activeAlerts, dismissAlert, dismissAll } =
+    usePerformanceAlerts({
+      checkInterval: 5000, // Check every 5 seconds
+      enabled: true,
+    });
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -59,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Alert Panel */}
       <AlertPanel
-        alerts={activeAlerts}
+        alerts={alerts}
         isOpen={alertPanelOpen}
         onClose={closeAlertPanel}
         onDismiss={dismissAlert}
