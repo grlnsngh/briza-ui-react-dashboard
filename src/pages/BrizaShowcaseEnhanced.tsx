@@ -1,8 +1,8 @@
 /**
  * Enhanced Briza UI Showcase Page
  *
- * Demonstrates ALL Briza UI components (real + simulated) with automatic performance monitoring.
- * Shows 20+ components to provide comprehensive monitoring data.
+ * Demonstrates ALL Briza UI components with automatic performance monitoring.
+ * Shows 22 library components to provide comprehensive monitoring data.
  */
 
 import { useState } from "react";

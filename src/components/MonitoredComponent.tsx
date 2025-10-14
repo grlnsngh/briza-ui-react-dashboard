@@ -53,12 +53,12 @@ export function MonitoredComponent({
         window.clearTimeout(updateTimerRef.current);
       }
 
-      // Batch update after 100ms of no new renders
+      // Batch update immediately (0ms = next tick, still batched for performance)
       updateTimerRef.current = window.setTimeout(() => {
         const metricsToUpdate = Array.from(localMetricsRef.current.values());
         metricsToUpdate.forEach((m) => updateComponentMetric(m));
         localMetricsRef.current.clear();
-      }, 100);
+      }, 0);
     },
     [updateComponentMetric]
   );

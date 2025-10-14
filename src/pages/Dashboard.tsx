@@ -203,7 +203,7 @@ export default function Dashboard() {
                 style={{
                   marginTop: "0.5rem",
                   fontSize: "0.75rem",
-                  color: "var(--color-primary)",
+                  color: "var(--color-text-secondary)",
                 }}
               >
                 <Link
@@ -216,6 +216,10 @@ export default function Dashboard() {
                 >
                   Load all components →
                 </Link>
+                <div style={{ marginTop: "0.25rem", fontSize: "0.7rem" }}>
+                  💡 {BRIZA_UI_COMPONENTS_EXPECTED - totalComponents} more will
+                  load when you visit the Showcase
+                </div>
               </div>
             )}
         </div>
