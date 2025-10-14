@@ -7,6 +7,8 @@
 
 import { useState } from "react";
 import { MonitoredComponent } from "../components/MonitoredComponent";
+import { ComponentLoadingIndicator } from "../components/common";
+import { BRIZA_UI_COMPONENTS_EXPECTED } from "../utils/constants";
 import styles from "./BrizaShowcase.module.css";
 
 export default function BrizaShowcaseEnhanced() {
@@ -52,14 +54,18 @@ export default function BrizaShowcaseEnhanced() {
 
   return (
     <div className={styles.container}>
+      {/* Component Loading Indicator */}
+      <ComponentLoadingIndicator
+        expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
+        timeout={5000}
+      />
+
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>
-            Briza UI Component Library (Enhanced)
-          </h1>
+          <h1 className={styles.title}>Briza UI Component Library</h1>
           <p className={styles.subtitle}>
-            20+ Components with Real-time Performance Monitoring
+            22 Library Components with Real-time Performance Monitoring
           </p>
         </div>
         <div className={styles.stats}>

@@ -199,6 +199,36 @@ export const ROUTES = {
 } as const;
 
 // =============================================================================
+// BRIZA UI LIBRARY
+// =============================================================================
+
+/**
+ * Total number of components in briza-ui-react library
+ * Based on Storybook component list:
+ * Button, Accordion, Autocomplete, Avatar, Breadcrumb, Card, Checkbox,
+ * DatePicker, FileUpload, FormField, Input, Modal, Pagination, Progress,
+ * Radio, Select, Skeleton, Slider, Spinner, Table, Tabs, Toast
+ */
+export const BRIZA_UI_COMPONENTS_EXPECTED = 22;
+
+/**
+ * Dashboard-specific components that should be excluded from component counts
+ * These are monitoring/infrastructure components, not UI library components
+ */
+export const DASHBOARD_COMPONENTS = [
+  "DemoModeToggle",
+  "EmptyState",
+  "LoadingSkeleton",
+  "AlertBell",
+  "AlertPanel",
+  "ComponentLoadingIndicator",
+  "ErrorBoundary",
+  "Header",
+  "Sidebar",
+  "Layout",
+] as const;
+
+// =============================================================================
 // LOCAL STORAGE KEYS
 // =============================================================================
 

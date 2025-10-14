@@ -21,6 +21,11 @@ import {
   PerformanceLineChart,
   PerformanceBarChart,
 } from "../components/charts";
+import { ComponentLoadingIndicator } from "../components/common";
+import {
+  BRIZA_UI_COMPONENTS_EXPECTED,
+  DASHBOARD_COMPONENTS,
+} from "../utils/constants";
 import styles from "./ComponentMonitor.module.css";
 
 type SortField =
@@ -40,14 +45,16 @@ export default function ComponentMonitor() {
     null
   );
 
-  // Convert componentMetrics Map to array
+  // Convert componentMetrics Map to array, excluding dashboard components
   const components = useMemo(() => {
-    return Array.from(state.componentMetrics.entries()).map(
-      ([name, metrics]) => ({
+    return Array.from(state.componentMetrics.entries())
+      .filter(
+        ([name]) => !(DASHBOARD_COMPONENTS as readonly string[]).includes(name)
+      )
+      .map(([name, metrics]) => ({
         name,
         ...metrics,
-      })
-    );
+      }));
   }, [state.componentMetrics]);
 
   // Filter components based on search
@@ -112,6 +119,16 @@ export default function ComponentMonitor() {
 
   return (
     <div className={styles.container}>
+      {/* Component Loading Indicator */}
+      {!state.isDemoMode &&
+        components.length > 0 &&
+        components.length < BRIZA_UI_COMPONENTS_EXPECTED && (
+          <ComponentLoadingIndicator
+            expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
+            timeout={5000}
+          />
+        )}
+
       {/* Header */}
       <div className={styles.header}>
         <div>

@@ -8,12 +8,17 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { usePerformanceContext } from "../contexts";
 import { formatNumber } from "../utils";
-import { ROUTES } from "../utils/constants";
+import {
+  ROUTES,
+  BRIZA_UI_COMPONENTS_EXPECTED,
+  DASHBOARD_COMPONENTS,
+} from "../utils/constants";
 import { generateMockComponentData } from "../utils/mockData";
 import {
   LoadingSkeleton,
   DemoModeToggle,
   EmptyState,
+  ComponentLoadingIndicator,
 } from "../components/common";
 
 export default function Dashboard() {
@@ -22,10 +27,16 @@ export default function Dashboard() {
   const [webVitalsLoading, setWebVitalsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const totalComponents = state.componentMetrics.size;
+  // Filter to only count Briza UI components (exclude dashboard-specific components)
+  const brizaUIComponents = Array.from(state.componentMetrics.entries()).filter(
+    ([name]) => !(DASHBOARD_COMPONENTS as readonly string[]).includes(name)
+  );
+  const totalComponents = brizaUIComponents.length;
+
+  // Calculate average score only from Briza UI components
   const avgScore =
-    Array.from(state.componentMetrics.values()).reduce(
-      (sum, metric) => sum + metric.performanceScore,
+    brizaUIComponents.reduce(
+      (sum, [, metric]) => sum + metric.performanceScore,
       0
     ) / totalComponents || 0;
 
@@ -58,6 +69,16 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding: "2rem" }}>
+      {/* Component Loading Indicator - Shows when components are being discovered */}
+      {!state.isDemoMode &&
+        totalComponents > 0 &&
+        totalComponents < BRIZA_UI_COMPONENTS_EXPECTED && (
+          <ComponentLoadingIndicator
+            expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
+            timeout={5000}
+          />
+        )}
+
       <header
         style={{
           marginBottom: "2rem",
@@ -90,8 +111,8 @@ export default function Dashboard() {
         <EmptyState
           icon="📊"
           title="No Components Monitored Yet"
-          description="Start monitoring Briza UI components to see real-time performance metrics, Web Vitals scores, and detailed analytics. Visit the Component Showcase page to interact with components, or enable Demo Mode to see sample data."
-          actionLabel="Go to Showcase"
+          description="Components need to mount first to be tracked. Visit the Component Showcase page to load all 22 Briza UI library components, or enable Demo Mode to see sample data immediately."
+          actionLabel="Load Components →"
           onAction={() => navigate(ROUTES.SHOWCASE)}
           secondaryActionLabel="Enable Demo Mode"
           onSecondaryAction={() => {
@@ -137,7 +158,23 @@ export default function Dashboard() {
             Total Components
           </div>
           <div style={{ fontSize: "2rem", fontWeight: "700" }}>
-            {totalComponents}
+            {!state.isDemoMode &&
+            totalComponents > 0 &&
+            totalComponents < BRIZA_UI_COMPONENTS_EXPECTED ? (
+              <>
+                {totalComponents}{" "}
+                <span
+                  style={{
+                    color: "var(--color-text-secondary)",
+                    fontSize: "1.5rem",
+                  }}
+                >
+                  / {BRIZA_UI_COMPONENTS_EXPECTED}
+                </span>
+              </>
+            ) : (
+              totalComponents
+            )}
           </div>
           {totalComponents === 0 && (
             <div
@@ -159,6 +196,28 @@ export default function Dashboard() {
               to start monitoring
             </div>
           )}
+          {!state.isDemoMode &&
+            totalComponents > 0 &&
+            totalComponents < BRIZA_UI_COMPONENTS_EXPECTED && (
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  fontSize: "0.75rem",
+                  color: "var(--color-primary)",
+                }}
+              >
+                <Link
+                  to={ROUTES.SHOWCASE}
+                  style={{
+                    color: "var(--color-primary)",
+                    textDecoration: "none",
+                    fontWeight: 500,
+                  }}
+                >
+                  Load all components →
+                </Link>
+              </div>
+            )}
         </div>
 
         {/* Avg Performance Score Card */}
