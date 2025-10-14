@@ -70,15 +70,21 @@
 }
 
 .count {
-  padding: 0.25rem 0.625rem;
+  padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 600;
-  background: var(--color-bg-tertiary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-tertiary),
+    var(--color-surface)
+  );
   color: var(--color-text-secondary);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .dismissedCount {
@@ -107,24 +113,73 @@
   background: var(--color-bg-hover);
   color: var(--color-text-primary);
   border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.dismissAllButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.1);
 }
 
 .clearDismissedButton {
+  display: flex;
+  align-items: center;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.08),
+    rgba(251, 191, 36, 0.05)
+  );
   color: var(--color-warning);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.clearDismissedButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.clearDismissedButton:hover::before {
+  left: 100%;
 }
 
 .clearDismissedButton:hover {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.15),
+    rgba(251, 191, 36, 0.1)
+  );
   border-color: var(--color-warning);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.clearDismissedButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+}
+
+.clearDismissedButton svg {
+  flex-shrink: 0;
 }
 
 .closeButton {
@@ -208,26 +263,62 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes successPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 .emptyIcon {
-  width: 4rem;
-  height: 4rem;
+  width: 5rem;
+  height: 5rem;
   color: var(--color-success);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  animation: successPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3));
 }
 
 .emptyTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--color-text-primary);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  background: linear-gradient(
+    135deg,
+    var(--color-success),
+    var(--color-primary)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .emptyMessage {
-  font-size: 0.9375rem;
+  font-size: 1rem;
+  line-height: 1.6;
   color: var(--color-text-secondary);
   margin: 0;
+  max-width: 400px;
 }
 
 /* Alert Sections */
