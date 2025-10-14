@@ -14,6 +14,7 @@ interface AlertPanelProps {
   onClose: () => void;
   onDismiss: (alertId: string) => void;
   onDismissAll: () => void;
+  onClearDismissed?: () => void;
 }
 
 export function AlertPanel({
@@ -22,6 +23,7 @@ export function AlertPanel({
   onClose,
   onDismiss,
   onDismissAll,
+  onClearDismissed,
 }: AlertPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [showDismissed, setShowDismissed] = useState(false);
@@ -114,6 +116,15 @@ export function AlertPanel({
                 aria-label="Dismiss all alerts"
               >
                 Dismiss All
+              </button>
+            )}
+            {dismissedCount > 0 && onClearDismissed && (
+              <button
+                className={styles.clearDismissedButton}
+                onClick={onClearDismissed}
+                aria-label="Clear dismissed alerts history"
+              >
+                Clear History
               </button>
             )}
             <button

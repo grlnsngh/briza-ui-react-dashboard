@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { usePerformanceContext } from "../contexts";
 import { getAllAlerts } from "../lib/performance/alerts";
 import type { PerformanceAlert, AlertThresholds } from "../types/alerts";
@@ -29,6 +30,7 @@ export function usePerformanceAlerts(
   } = options;
 
   const { state } = usePerformanceContext();
+  const location = useLocation();
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([]);
 
   const thresholds: AlertThresholds = useMemo(
@@ -111,12 +113,22 @@ export function usePerformanceAlerts(
     setAlerts([]);
   }, []);
 
+  const clearDismissed = useCallback(() => {
+    setAlerts((prev) => prev.filter((alert) => !alert.dismissed));
+  }, []);
+
+  // Auto-clear dismissed alerts when navigating to a different page
+  useEffect(() => {
+    clearDismissed();
+  }, [location.pathname, clearDismissed]);
+
   return {
     alerts,
     activeAlerts: alerts.filter((a) => !a.dismissed),
     dismissAlert,
     dismissAll,
     clearAlerts,
+    clearDismissed,
     checkAlerts,
   };
 }

@@ -21,7 +21,7 @@ export default function Layout({ children }: LayoutProps) {
   const [alertPanelOpen, setAlertPanelOpen] = useState(false);
 
   // Performance alerts
-  const { alerts, activeAlerts, dismissAlert, dismissAll } =
+  const { alerts, activeAlerts, dismissAlert, dismissAll, clearDismissed } =
     usePerformanceAlerts({
       checkInterval: 5000, // Check every 5 seconds
       enabled: true,
@@ -65,6 +65,7 @@ export default function Layout({ children }: LayoutProps) {
         onClose={closeAlertPanel}
         onDismiss={dismissAlert}
         onDismissAll={dismissAll}
+        onClearDismissed={clearDismissed}
       />
     </div>
   );
