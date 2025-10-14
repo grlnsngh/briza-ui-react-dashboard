@@ -23,7 +23,7 @@ export default function Layout({ children }: LayoutProps) {
   // Performance alerts
   const { alerts, activeAlerts, dismissAlert, dismissAll, clearDismissed } =
     usePerformanceAlerts({
-      checkInterval: 5000, // Check every 5 seconds
+      checkInterval: 10000, // Check every 10 seconds (optimized to reduce overhead)
       enabled: true,
     });
 

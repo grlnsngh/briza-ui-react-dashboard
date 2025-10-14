@@ -134,10 +134,10 @@ export function checkComponentMetrics(
     );
   }
 
-  // Check memory usage
+  // Check memory usage - only alert if significantly over threshold
   if (
     metrics.memoryUsage &&
-    metrics.memoryUsage > thresholds.memoryGrowthThreshold
+    metrics.memoryUsage > thresholds.memoryGrowthThreshold * 1.5 // 1.5x buffer to reduce false positives
   ) {
     alerts.push(
       createAlert(
@@ -148,9 +148,13 @@ export function checkComponentMetrics(
           metrics.memoryUsage /
           1024 /
           1024
+        ).toFixed(2)}MB of memory (threshold: ${(
+          thresholds.memoryGrowthThreshold /
+          1024 /
+          1024
         ).toFixed(
-          2
-        )}MB of memory. Check for memory leaks or large data structures.`,
+          0
+        )}MB). Monitor for potential memory leaks or optimize large data structures if memory continues to grow.`,
         {
           componentName: metrics.componentName,
           metric: "memoryUsage",

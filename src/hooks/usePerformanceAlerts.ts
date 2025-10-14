@@ -25,7 +25,7 @@ export function usePerformanceAlerts(
 ) {
   const {
     thresholds: customThresholds,
-    checkInterval = 5000, // Check every 5 seconds
+    checkInterval = 10000, // Check every 10 seconds (increased from 5s to reduce overhead)
     enabled = true,
   } = options;
 

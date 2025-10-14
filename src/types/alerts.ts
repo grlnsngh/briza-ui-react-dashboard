@@ -29,7 +29,7 @@ export interface AlertThresholds {
   maxRenderTime: number;
   /** Maximum renders per second (default: 20) */
   maxRendersPerSecond: number;
-  /** Memory growth threshold in bytes (default: 10MB) */
+  /** Memory usage threshold in bytes - triggers warning when component exceeds this (default: 50MB - normal for modern React apps is 20-100MB) */
   memoryGrowthThreshold: number;
   /** Maximum bundle size in bytes (default: 500KB) */
   maxBundleSize: number;
@@ -40,7 +40,7 @@ export interface AlertThresholds {
 export const DEFAULT_THRESHOLDS: AlertThresholds = {
   maxRenderTime: 16,
   maxRendersPerSecond: 20,
-  memoryGrowthThreshold: 10 * 1024 * 1024, // 10MB
+  memoryGrowthThreshold: 50 * 1024 * 1024, // 50MB (realistic for modern React apps)
   maxBundleSize: 500 * 1024, // 500KB
   minWebVitalsScore: 70,
 };
