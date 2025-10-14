@@ -4,3 +4,4 @@
 
 export { useComponentPerformance } from "./useComponentPerformance";
 export { useCoreWebVitals } from "./useCoreWebVitals";
+export { usePerformanceAlerts } from "./usePerformanceAlerts";

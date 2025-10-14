@@ -31,6 +31,14 @@ export type {
   ChartData,
 } from "./performance";
 
+// Alert types
+export type {
+  AlertSeverity,
+  AlertType,
+  PerformanceAlert,
+  AlertThresholds,
+} from "./alerts";
+
 // Dashboard types
 export type {
   NavItem,
