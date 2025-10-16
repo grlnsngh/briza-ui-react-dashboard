@@ -11,7 +11,6 @@ import {
   type ReactNode,
   useRef,
   useCallback,
-  useEffect,
 } from "react";
 import { usePerformanceContext } from "../contexts";
 import type { ComponentPerformanceMetrics } from "../types/performance";
@@ -43,16 +42,6 @@ export function MonitoredComponent({
     new Map()
   );
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (updateTimerRef.current !== null) {
-        window.clearTimeout(updateTimerRef.current);
-        updateTimerRef.current = null;
-      }
-    };
-  }, []);
-
   // Debounced update function to batch metric updates
   const debouncedUpdate = useCallback(
     (metric: ComponentPerformanceMetrics) => {
@@ -60,7 +49,7 @@ export function MonitoredComponent({
       localMetricsRef.current.set(metric.componentName, metric);
 
       // Clear existing timer
-      if (updateTimerRef.current !== null) {
+      if (updateTimerRef.current) {
         window.clearTimeout(updateTimerRef.current);
       }
 
@@ -69,7 +58,6 @@ export function MonitoredComponent({
         const metricsToUpdate = Array.from(localMetricsRef.current.values());
         metricsToUpdate.forEach((m) => updateComponentMetric(m));
         localMetricsRef.current.clear();
-        updateTimerRef.current = null;
       }, 100);
     },
     [updateComponentMetric]

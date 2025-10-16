@@ -5,7 +5,7 @@
  * Shows 20+ components to provide comprehensive monitoring data.
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { MonitoredComponent } from "../components/MonitoredComponent";
 import { ComponentLoadingIndicator } from "../components/common";
 import { BRIZA_UI_COMPONENTS_EXPECTED } from "../utils/constants";
@@ -27,22 +27,6 @@ export default function BrizaShowcaseEnhanced() {
   const [progress, setProgress] = useState(60);
   const [forceRenderCount, setForceRenderCount] = useState(0);
 
-  // Refs for cleanup
-  const progressIntervalRef = useRef<number | null>(null);
-  const progressTimeoutRef = useRef<number | null>(null);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (progressIntervalRef.current !== null) {
-        clearInterval(progressIntervalRef.current);
-      }
-      if (progressTimeoutRef.current !== null) {
-        clearTimeout(progressTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Stress test functions
   const handleStressTest = () => {
     for (let i = 0; i < 10; i++) {
@@ -57,27 +41,13 @@ export default function BrizaShowcaseEnhanced() {
   };
 
   const handleProgressAnimation = () => {
-    // Clear any existing intervals/timeouts
-    if (progressIntervalRef.current !== null) {
-      clearInterval(progressIntervalRef.current);
-    }
-    if (progressTimeoutRef.current !== null) {
-      clearTimeout(progressTimeoutRef.current);
-    }
-
     let prog = 0;
-    progressIntervalRef.current = window.setInterval(() => {
+    const interval = setInterval(() => {
       prog += 5;
       setProgress(prog);
       if (prog >= 100) {
-        if (progressIntervalRef.current !== null) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-        progressTimeoutRef.current = window.setTimeout(() => {
-          setProgress(60);
-          progressTimeoutRef.current = null;
-        }, 500);
+        clearInterval(interval);
+        setTimeout(() => setProgress(60), 500);
       }
     }, 100);
   };

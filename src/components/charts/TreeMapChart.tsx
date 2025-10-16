@@ -13,41 +13,12 @@ interface TreeMapNode {
   name: string;
   size: number;
   children?: TreeMapNode[];
-  [key: string]: unknown; // Allow additional properties for Recharts
 }
 
 interface TreeMapChartProps {
   data: TreeMapNode[];
   height?: number;
   colorScheme?: string[];
-}
-
-interface CustomContentProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  name: string;
-  size: number;
-  index: number;
-  depth?: number;
-  root?: TreeMapNode;
-}
-
-interface TooltipPayload {
-  payload: TreeMapNode & {
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-    depth?: number;
-    index?: number;
-  };
-}
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayload[];
 }
 
 const DEFAULT_COLORS = [
@@ -66,7 +37,7 @@ export default function TreeMapChart({
   height = 400,
   colorScheme = DEFAULT_COLORS,
 }: TreeMapChartProps) {
-  const CustomContent = (props: CustomContentProps) => {
+  const CustomContent = (props: any) => {
     const { x, y, width, height, name, size, index } = props;
 
     if (width < 50 || height < 30) return null;
@@ -114,7 +85,7 @@ export default function TreeMapChart({
     );
   };
 
-  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -149,11 +120,11 @@ export default function TreeMapChart({
     <div className={styles.chartContainer}>
       <ResponsiveContainer width="100%" height={height}>
         <Treemap
-          data={data}
+          data={data as any}
           dataKey="size"
           stroke="#fff"
           fill="#3b82f6"
-          content={<CustomContent {...({} as CustomContentProps)} />}
+          content={<CustomContent />}
         >
           <Tooltip content={<CustomTooltip />} />
         </Treemap>

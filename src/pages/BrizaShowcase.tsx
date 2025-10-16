@@ -14,12 +14,19 @@ import styles from "./BrizaShowcase.module.css";
 // For now, we'll create demo wrappers that simulate component behavior
 
 export default function BrizaShowcase() {
+  // Debug logging
+  console.log("BrizaShowcase component rendering");
+  console.log("Styles loaded:", styles);
+
   const [buttonClicks, setButtonClicks] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [selectedTab, setSelectedTab] = useState(0);
   const [checkboxStates, setCheckboxStates] = useState([false, false, false]);
   const [showModal, setShowModal] = useState(false);
   const [forceRenderCount, setForceRenderCount] = useState(0);
+
+  // Test if MonitoredComponent is causing issues
+  console.log("MonitoredComponent:", MonitoredComponent);
 
   // Stress test: Force re-renders
   const handleStressTest = () => {
