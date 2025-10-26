@@ -281,6 +281,12 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
 
   const updateComponentMetric = useCallback(
     (metric: ComponentPerformanceMetrics) => {
+      // Log in production for debugging
+      if (import.meta.env.PROD) {
+        console.log(
+          `[PerformanceContext] Updating metric: ${metric.componentName}, renders: ${metric.renderCount}`
+        );
+      }
       dispatch({ type: "UPDATE_COMPONENT_METRIC", payload: metric });
     },
     []

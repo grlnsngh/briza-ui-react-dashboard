@@ -19,6 +19,10 @@ const queryClient = new QueryClient({
   },
 });
 
+// Log environment for debugging
+console.log("[App] Environment:", import.meta.env.MODE);
+console.log("[App] Production:", import.meta.env.PROD);
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>

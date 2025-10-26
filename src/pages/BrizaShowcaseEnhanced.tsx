@@ -5,7 +5,7 @@
  * Shows 20+ components to provide comprehensive monitoring data.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MonitoredComponent } from "../components/MonitoredComponent";
 import { ComponentLoadingIndicator } from "../components/common";
 import { BRIZA_UI_COMPONENTS_EXPECTED } from "../utils/constants";
@@ -26,6 +26,17 @@ export default function BrizaShowcaseEnhanced() {
   const [accordionOpen, setAccordionOpen] = useState([false, false, false]);
   const [progress, setProgress] = useState(60);
   const [forceRenderCount, setForceRenderCount] = useState(0);
+
+  // Force an initial re-render to ensure components register with Profiler
+  // This is especially important in production builds
+  useEffect(() => {
+    // Trigger a state update to force component re-renders
+    const timer = setTimeout(() => {
+      setForceRenderCount(1);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Stress test functions
   const handleStressTest = () => {

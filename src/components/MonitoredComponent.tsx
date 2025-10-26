@@ -11,6 +11,7 @@ import {
   type ReactNode,
   useRef,
   useCallback,
+  useEffect,
 } from "react";
 import { usePerformanceContext } from "../contexts";
 import type { ComponentPerformanceMetrics } from "../types/performance";
@@ -41,6 +42,7 @@ export function MonitoredComponent({
   const localMetricsRef = useRef<Map<string, ComponentPerformanceMetrics>>(
     new Map()
   );
+  const hasInitializedRef = useRef(false);
 
   // Debounced update function to batch metric updates
   const debouncedUpdate = useCallback(
@@ -63,15 +65,51 @@ export function MonitoredComponent({
     [updateComponentMetric]
   );
 
+  // Initialize component metric on first render
+  // This ensures the component is registered even if Profiler doesn't fire immediately
+  useEffect(() => {
+    if (!hasInitializedRef.current && enabled) {
+      hasInitializedRef.current = true;
+
+      // Create initial metric if it doesn't exist
+      if (!state.componentMetrics.has(name)) {
+        const initialMetric: ComponentPerformanceMetrics = {
+          componentName: name,
+          renderCount: 0,
+          avgRenderTime: 0,
+          lastRenderTime: 0,
+          totalRenderTime: 0,
+          performanceScore: 100,
+          lastRenderTimestamp: Date.now(),
+          renderHistory: [],
+          isTracking: true,
+        };
+        updateComponentMetric(initialMetric);
+
+        // Log for debugging in production
+        if (import.meta.env.PROD) {
+          console.log(`[MonitoredComponent] Initialized: ${name}`);
+        }
+      }
+    }
+  }, [name, enabled, state.componentMetrics, updateComponentMetric]);
+
   const onRenderCallback: ProfilerOnRenderCallback = (
     id,
-    _phase,
+    phase,
     actualDuration,
     _baseDuration,
     startTime,
     commitTime
   ) => {
     if (!enabled) return;
+
+    // Log in production for debugging
+    if (import.meta.env.PROD && phase === "mount") {
+      console.log(
+        `[Profiler] ${id} mounted - duration: ${actualDuration.toFixed(2)}ms`
+      );
+    }
 
     // Get existing data or create new
     const currentMetric = state.componentMetrics.get(id) || {

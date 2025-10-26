@@ -5,6 +5,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "/", // Ensure proper base URL for production
   plugins: [
     react(),
     // Bundle analyzer for performance monitoring
@@ -47,5 +48,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     open: true,
+  },
+  preview: {
+    port: 4173,
+    open: true,
+    cors: true,
   },
 }));
