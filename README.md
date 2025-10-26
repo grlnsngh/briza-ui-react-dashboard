@@ -24,6 +24,7 @@
 - [Development](#development)
 - [Deployment](#deployment)
 - [Documentation](#documentation)
+- [Author](#author)
 - [License](#license)
 
 ---
@@ -464,212 +465,32 @@ The dashboard uses:
 npm run dev          # Start development server with HMR
 npm run build        # Production build with optimizations
 npm run preview      # Preview production build locally
-
-# Code Quality
 npm run lint         # Run ESLint on codebase
-npm run type-check   # TypeScript type checking
-
-# Testing
-npm run test         # Run unit tests with Vitest
-npm run test:ui      # Run tests with Vitest UI
-npm run test:coverage # Generate coverage report
-
-# Analysis
-npm run analyze      # Generate bundle size visualization
 ```
-
-### Development Workflow
-
-1. **Create a new branch**
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes**
-
-   - Write code following TypeScript best practices
-   - Add types for new functionality
-   - Update tests if needed
-
-3. **Test your changes**
-
-   ```bash
-   npm run lint        # Check for linting errors
-   npm run type-check  # Verify TypeScript types
-   npm run test        # Run test suite
-   ```
-
-4. **Build and verify**
-   ```bash
-   npm run build       # Ensure production build succeeds
-   npm run preview     # Test production build locally
-   ```
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-# Development
-VITE_APP_TITLE=Briza UI Performance Dashboard
-VITE_ENABLE_DEMO_MODE=true
-
-# Analytics (Optional)
-VITE_ANALYTICS_ID=your-analytics-id
-
-# API Endpoints (Optional)
-VITE_API_BASE_URL=http://localhost:3000
-```
-
-### Browser Support
-
-- Chrome/Edge: Latest 2 versions
-- Firefox: Latest 2 versions
-- Safari: Latest 2 versions
-- Mobile browsers: iOS Safari 14+, Chrome Android 90+
 
 ---
 
 ## 🚀 Deployment
 
-### Deploy to Vercel (Recommended)
+This project is deployed on **Vercel**. The production build is automatically deployed from the `main` branch.
 
-The project includes a `vercel.json` configuration for optimal deployment:
+**Live URL:** [https://briza-ui-react-dashboard.vercel.app/](https://briza-ui-react-dashboard.vercel.app/)
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy to preview
-vercel
-
-# Deploy to production
-vercel --prod
-```
-
-**Or use the Vercel Dashboard:**
-
-1. Push your code to GitHub
-2. Import repository in Vercel
-3. Configure build settings (auto-detected)
-4. Deploy!
-
-### Deploy to Netlify
+### Build Commands
 
 ```bash
-# Install Netlify CLI
-npm i -g netlify-cli
-
-# Build and deploy
-npm run build
-netlify deploy --prod --dir=dist
-```
-
-### Deploy to GitHub Pages
-
-```bash
-# Update vite.config.ts base path
-base: '/briza-ui-react-dashboard/'
-
-# Build
+# Production build
 npm run build
 
-# Deploy to gh-pages branch
-npm run deploy
-```
-
-### Docker Deployment
-
-```dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-### Environment-Specific Builds
-
-```bash
-# Production build with optimizations
-npm run build
-
-# Development build with source maps
-npm run build -- --mode development
-
-# Staging build
-npm run build -- --mode staging
+# Preview production build locally
+npm run preview
 ```
 
 ---
 
 ## 📚 Documentation
 
-Comprehensive documentation is available in the `/docs` directory:
-
-### Getting Started
-
-- [Quick Start Guide](docs/QUICK_START.md) - Get up and running in minutes
-- [Setup Summary](docs/SETUP_SUMMARY.md) - Complete setup instructions
-- [Demo Mode Guide](docs/DEMO_MODE_GUIDE.md) - Using demo mode with mock data
-
-### Core Concepts
-
-- [Demo vs Live Explained](docs/DEMO_VS_LIVE_EXPLAINED.md) - Understanding monitoring modes
-- [Fixed Real Monitoring](docs/FIXED_REAL_MONITORING.md) - How automatic monitoring works
-- [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md) - What's been built
-
-### Features & Roadmap
-
-- [Project Completion Summary](docs/PROJECT_COMPLETION_SUMMARY.md) - Full project status
-- [Improvement Roadmap](docs/IMPROVEMENT_ROADMAP.md) - Future features and priorities
-- [Portfolio Highlights](docs/PORTFOLIO_HIGHLIGHTS.md) - Key features to showcase
-
-### Deployment
-
-- [Deployment Guide](docs/DEPLOYMENT_GUIDE.md) - Deploy to Vercel, Netlify, etc.
-- [Deployment Ready Checklist](docs/DEPLOYMENT_READY.md) - Pre-deployment verification
-
-### Troubleshooting
-
-- [Showcase Blank Page Fix](docs/SHOWCASE_BLANK_PAGE_FIX.md) - Common issues
-- [Dashboard Loading States](docs/DASHBOARD_LOADING_STATES.md) - Loading indicators
-- [Web Vitals Loading States](docs/WEB_VITALS_LOADING_STATES.md) - Web Vitals troubleshooting
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! This project follows standard open-source contribution guidelines.
-
-### How to Contribute
-
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
-4. **Push to the branch** (`git push origin feature/amazing-feature`)
-5. **Open a Pull Request**
-
-### Contribution Guidelines
-
-- Follow existing code style and conventions
-- Write meaningful commit messages
-- Add tests for new features
-- Update documentation as needed
-- Ensure all tests pass before submitting PR
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+Comprehensive documentation is available in the `/docs` directory for detailed guides on setup, features, and troubleshooting.
 
 ---
 
@@ -682,28 +503,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 🙏 Acknowledgments
-
-- **React Team** - For the amazing framework and Profiler API
-- **Vercel** - For Vite and excellent hosting
-- **TanStack** - For React Query
-- **Recharts Team** - For the visualization library
-- **Google Chrome Team** - For Web Vitals standards and library
-
----
-
-## 📊 Project Stats
-
-- **Lines of Code**: 10,000+
-- **Components**: 50+
-- **Custom Hooks**: 10+
-- **Type Definitions**: 500+ lines
-- **Documentation**: 15+ comprehensive guides
-- **Features**: 7 major monitoring tools
-
----
-
-## 🔗 Related Projects
+## Related Projects
 
 - [briza-ui-react](https://github.com/grlnsngh/briza-ui-react) - The UI library being monitored
 - [briza-ui-react on npm](https://www.npmjs.com/package/briza-ui-react) - NPM package
@@ -711,13 +511,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 💬 Support
+## � License
 
-For questions, issues, or feature requests:
-
-- **GitHub Issues**: [Create an issue](https://github.com/grlnsngh/briza-ui-react-dashboard/issues)
-- **Documentation**: Check the `/docs` directory
-- **NPM Package Issues**: [briza-ui-react issues](https://github.com/grlnsngh/briza-ui-react/issues)
+This project is licensed under the **MIT License**
 
 ---
 
