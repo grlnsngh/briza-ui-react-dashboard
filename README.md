@@ -7,7 +7,7 @@
 
 > A comprehensive performance monitoring and analytics dashboard built to track, analyze, and visualize the performance metrics of the [briza-ui-react](https://www.npmjs.com/package/briza-ui-react) component library. This production-ready application demonstrates advanced React patterns, performance optimization techniques, and modern development best practices.
 
-**🔗 Live Demo:** [Coming Soon - Deploying to Vercel]
+**🔗 Live Demo:** [https://briza-ui-react-dashboard.vercel.app/](https://briza-ui-react-dashboard.vercel.app/)
 
 ---
 
