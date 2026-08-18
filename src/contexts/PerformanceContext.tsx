@@ -16,8 +16,6 @@
  */
 
 import {
-  createContext,
-  useContext,
   useReducer,
   useCallback,
   useEffect,
@@ -28,28 +26,15 @@ import type {
   ComponentPerformanceMetrics,
   DashboardFilters,
   DashboardState,
-  PerformanceMeasurement,
   WebVitalsData,
+  PerformanceMeasurement,
 } from "../types/performance";
 import { getStorageItem, setStorageItem } from "../utils";
 import { STORAGE_KEYS } from "../utils/constants";
-
-// =============================================================================
-// CONTEXT STATE
-// =============================================================================
-
-interface PerformanceState {
-  /** All component performance metrics */
-  componentMetrics: Map<string, ComponentPerformanceMetrics>;
-  /** Web Vitals data */
-  webVitals: WebVitalsData | null;
-  /** Dashboard state */
-  dashboard: DashboardState;
-  /** Raw performance measurements */
-  measurements: PerformanceMeasurement[];
-  /** Demo mode enabled */
-  isDemoMode: boolean;
-}
+import {
+  PerformanceContext,
+  type PerformanceState,
+} from "./performanceContextValue";
 
 // =============================================================================
 // ACTIONS
@@ -219,49 +204,6 @@ function performanceReducer(
       return state;
   }
 }
-
-// =============================================================================
-// CONTEXT
-// =============================================================================
-
-interface PerformanceContextValue {
-  /** Current state */
-  state: PerformanceState;
-  /** Add a performance measurement */
-  addMeasurement: (measurement: PerformanceMeasurement) => void;
-  /** Update component metric */
-  updateComponentMetric: (metric: ComponentPerformanceMetrics) => void;
-  /** Update Web Vitals */
-  updateWebVitals: (vitals: WebVitalsData) => void;
-  /** Set dashboard filters */
-  setFilters: (filters: Partial<DashboardFilters>) => void;
-  /** Set selected component */
-  setSelectedComponent: (componentName: string | null) => void;
-  /** Toggle real-time monitoring */
-  toggleRealtime: (enabled: boolean) => void;
-  /** Set loading state */
-  setLoading: (loading: boolean) => void;
-  /** Set error */
-  setError: (error: string | null) => void;
-  /** Clear all metrics */
-  clearMetrics: () => void;
-  /** Reset to initial state */
-  resetState: () => void;
-  /** Get metric for specific component */
-  getComponentMetric: (
-    componentName: string
-  ) => ComponentPerformanceMetrics | undefined;
-  /** Get filtered components */
-  getFilteredComponents: () => ComponentPerformanceMetrics[];
-  /** Load mock data for demo */
-  loadMockData: (data: ComponentPerformanceMetrics[]) => void;
-  /** Toggle demo mode */
-  toggleDemoMode: (enabled: boolean) => void;
-}
-
-const PerformanceContext = createContext<PerformanceContextValue | undefined>(
-  undefined
-);
 
 // =============================================================================
 // PROVIDER
@@ -443,25 +385,4 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
       {children}
     </PerformanceContext.Provider>
   );
-}
-
-// =============================================================================
-// HOOK
-// =============================================================================
-
-/**
- * Hook to access performance context
- *
- * @throws Error if used outside of PerformanceProvider
- */
-export function usePerformanceContext() {
-  const context = useContext(PerformanceContext);
-
-  if (context === undefined) {
-    throw new Error(
-      "usePerformanceContext must be used within a PerformanceProvider"
-    );
-  }
-
-  return context;
 }

@@ -13,12 +13,38 @@ interface TreeMapNode {
   name: string;
   size: number;
   children?: TreeMapNode[];
+  /**
+   * Recharts' `TreemapDataType` carries an open index signature because it
+   * augments each node internally. Mirroring it here lets `data` be passed
+   * without an `any` cast.
+   */
+  [key: string]: unknown;
 }
 
 interface TreeMapChartProps {
   data: TreeMapNode[];
   height?: number;
   colorScheme?: string[];
+}
+
+/**
+ * Props Recharts passes to a Treemap `content` renderer. All are optional
+ * because Recharts also renders the element once without layout values.
+ */
+interface TreeMapContentProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  name?: string;
+  size?: number;
+  index?: number;
+}
+
+/** Props Recharts passes to a Tooltip `content` renderer. */
+interface TreeMapTooltipProps {
+  active?: boolean;
+  payload?: { payload: TreeMapNode }[];
 }
 
 const DEFAULT_COLORS = [
@@ -37,8 +63,16 @@ export default function TreeMapChart({
   height = 400,
   colorScheme = DEFAULT_COLORS,
 }: TreeMapChartProps) {
-  const CustomContent = (props: any) => {
-    const { x, y, width, height, name, size, index } = props;
+  const CustomContent = (props: TreeMapContentProps) => {
+    const {
+      x = 0,
+      y = 0,
+      width = 0,
+      height = 0,
+      name = "",
+      size = 0,
+      index = 0,
+    } = props;
 
     if (width < 50 || height < 30) return null;
 
@@ -85,7 +119,7 @@ export default function TreeMapChart({
     );
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: TreeMapTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -120,7 +154,7 @@ export default function TreeMapChart({
     <div className={styles.chartContainer}>
       <ResponsiveContainer width="100%" height={height}>
         <Treemap
-          data={data as any}
+          data={data}
           dataKey="size"
           stroke="#fff"
           fill="#3b82f6"

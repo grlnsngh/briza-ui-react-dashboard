@@ -182,24 +182,3 @@ export function MonitoredComponent({
     </Profiler>
   );
 }
-
-/**
- * HOC version for wrapping components
- */
-export function withPerformanceMonitoring<P extends object>(
-  Component: React.ComponentType<P>,
-  componentName?: string
-) {
-  const displayName =
-    componentName || Component.displayName || Component.name || "Component";
-
-  const WrappedComponent = (props: P) => (
-    <MonitoredComponent name={displayName}>
-      <Component {...props} />
-    </MonitoredComponent>
-  );
-
-  WrappedComponent.displayName = `Monitored(${displayName})`;
-
-  return WrappedComponent;
-}
