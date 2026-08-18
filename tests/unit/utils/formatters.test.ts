@@ -14,7 +14,8 @@ import {
 describe("formatNumber", () => {
   it("should format integer numbers with default precision", () => {
     expect(formatNumber(42)).toBe("42");
-    expect(formatNumber(1234)).toBe("1234");
+    // formatNumber uses Intl grouping separators for readability in tables
+    expect(formatNumber(1234)).toBe("1,234");
   });
 
   it("should format decimal numbers with specified precision", () => {
@@ -34,8 +35,8 @@ describe("formatNumber", () => {
   });
 
   it("should handle very large numbers", () => {
-    expect(formatNumber(1000000)).toBe("1000000");
-    expect(formatNumber(1234567.89, 2)).toBe("1234567.89");
+    expect(formatNumber(1000000)).toBe("1,000,000");
+    expect(formatNumber(1234567.89, 2)).toBe("1,234,567.89");
   });
 
   it("should handle very small numbers", () => {
@@ -128,11 +129,14 @@ describe("formatDate", () => {
   it("should format timestamps correctly", () => {
     const timestamp = new Date("2025-10-13T12:00:00Z").getTime();
     const formatted = formatDate(timestamp);
+    const local = new Date(timestamp);
 
-    // Basic check that it contains expected parts
-    expect(formatted).toContain("2025");
-    expect(formatted).toContain("10");
-    expect(formatted).toContain("13");
+    // formatDate renders an abbreviated month name (month: "short"), so assert
+    // the shape rather than a numeric month. Day and year are derived from the
+    // same instant so the test holds in any timezone.
+    expect(formatted).toMatch(/^[A-Z][a-z]{2} /);
+    expect(formatted).toContain(local.getFullYear().toString());
+    expect(formatted).toContain(local.getDate().toString());
   });
 
   it("should handle Date.now() timestamps", () => {
