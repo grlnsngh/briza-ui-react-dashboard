@@ -10,18 +10,32 @@ import { WEB_VITALS_THRESHOLDS } from "./constants";
 // =============================================================================
 
 /**
- * Format bytes to human-readable string
+ * Format bytes to human-readable string.
+ *
+ * Values below 1 byte, negatives, and non-finite input all collapse to "0 B"
+ * rather than producing "NaN undefined" from an out-of-range unit lookup.
+ *
+ * @example
+ * formatBytes(1536)    // "1.5 KB"
+ * formatBytes(1536, 2) // "1.50 KB"
+ * formatBytes(512)     // "512 B"  (byte tier is always whole)
  */
-export function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) return "0 Bytes";
+export function formatBytes(bytes: number, decimals = 1): string {
+  if (!Number.isFinite(bytes) || bytes < 1) return "0 B";
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB"];
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  // Clamp the exponent so very large inputs cannot index past the array.
+  const i = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(k)),
+    sizes.length - 1
+  );
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  if (i === 0) return `${Math.round(bytes)} B`;
+
+  return `${(bytes / Math.pow(k, i)).toFixed(dm)} ${sizes[i]}`;
 }
 
 /**
@@ -44,10 +58,18 @@ export function formatNumber(num: number, decimals = 0): string {
 }
 
 /**
- * Format percentage
+ * Format a percentage.
+ *
+ * The input is a percentage already in the 0-100 range, NOT a 0-1 ratio.
+ * Pass `15.8` to get "16%", or `15.8, 1` to get "15.8%". Callers holding a
+ * ratio should multiply by 100 themselves.
+ *
+ * @example
+ * formatPercentage(50)       // "50%"
+ * formatPercentage(33.333, 1) // "33.3%"
  */
-export function formatPercentage(value: number, decimals = 1): string {
-  return `${(value * 100).toFixed(decimals)}%`;
+export function formatPercentage(value: number, decimals = 0): string {
+  return `${value.toFixed(decimals < 0 ? 0 : decimals)}%`;
 }
 
 /**

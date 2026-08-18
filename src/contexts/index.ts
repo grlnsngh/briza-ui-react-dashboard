@@ -2,7 +2,9 @@
  * Context Exports
  */
 
-export {
-  PerformanceProvider,
-  usePerformanceContext,
-} from "./PerformanceContext";
+export { PerformanceProvider } from "./PerformanceContext";
+export { usePerformanceContext } from "./usePerformanceContext";
+export type {
+  PerformanceState,
+  PerformanceContextValue,
+} from "./performanceContextValue";

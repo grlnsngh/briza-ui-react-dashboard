@@ -239,7 +239,8 @@ export default function BundleAnalyzer() {
                         />
                         <span className={styles.percentageText}>
                           {formatPercentage(
-                            (dep.size / mockBundleData.totalSize) * 100
+                            (dep.size / mockBundleData.totalSize) * 100,
+                            1
                           )}
                         </span>
                       </div>
