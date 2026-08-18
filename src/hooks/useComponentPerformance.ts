@@ -2,7 +2,17 @@
  * useComponentPerformance Hook
  *
  * Custom React hook for tracking component performance metrics including
- * render count, render time, and memory usage using React Profiler API.
+ * render count, render time, and memory usage.
+ *
+ * Measurement model
+ * -----------------
+ * Samples are accumulated into refs on every commit and published to React
+ * state (and to the performance context) on a fixed interval. Nothing is
+ * written to state during measurement itself, because a metrics hook that
+ * re-renders its host on every render would feed on its own output.
+ *
+ * For per-commit accuracy backed by React's own instrumentation, prefer
+ * wrapping the subtree in `<MonitoredComponent>`, which uses `<Profiler>`.
  *
  * @example
  * ```tsx
@@ -17,8 +27,17 @@
  * ```
  */
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import type { ComponentPerformanceMetrics } from "../types/performance";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
+import type {
+  ComponentPerformanceMetrics,
+  PerformanceMeasurement,
+} from "../types/performance";
 import { usePerformanceContext } from "../contexts";
 import { calculatePerformanceScore } from "../utils";
 
@@ -35,6 +54,11 @@ interface UseComponentPerformanceOptions {
   trackRenders?: boolean;
   /** Whether to automatically report to context */
   autoReport?: boolean;
+  /**
+   * How often (ms) accumulated samples are published to state and context.
+   * Lower values refresh the UI sooner at the cost of more re-renders.
+   */
+  publishInterval?: number;
 }
 
 interface UseComponentPerformanceReturn {
@@ -60,6 +84,9 @@ interface UseComponentPerformanceReturn {
   getMetrics: () => ComponentPerformanceMetrics;
 }
 
+/** Maximum number of render samples retained in memory */
+const MAX_SAMPLES = 100;
+
 // =============================================================================
 // HOOK
 // =============================================================================
@@ -69,6 +96,7 @@ export function useComponentPerformance({
   trackMemory = false,
   trackRenders = true,
   autoReport = true,
+  publishInterval = 1000,
 }: UseComponentPerformanceOptions): UseComponentPerformanceReturn {
   const { updateComponentMetric } = usePerformanceContext();
 
@@ -78,147 +106,161 @@ export function useComponentPerformance({
   const [memoryUsage, setMemoryUsage] = useState(0);
   const [isTracking, setIsTracking] = useState(trackRenders);
 
-  const renderTimesRef = useRef<number[]>([]);
-  const lastRenderStartRef = useRef<number>(0);
-  const mountTimeRef = useRef<number>(Date.now());
+  // Running totals live in refs so recording a sample never triggers a render.
+  const renderSamplesRef = useRef<PerformanceMeasurement[]>([]);
+  const renderCountRef = useRef(0);
+  const totalRenderTimeRef = useRef(0);
+  const lastRenderTimeRef = useRef(0);
+  const lastRenderTimestampRef = useRef(Date.now());
+  const memoryUsageRef = useRef(0);
 
-  // Track render start time
-  useEffect(() => {
-    if (!isTracking) return;
+  // Number of samples already pushed to state, so an idle component publishes nothing.
+  const publishedCountRef = useRef(0);
+  // Marks the render caused by our own publish, so it is not counted as a sample.
+  const selfInducedRenderRef = useRef(false);
 
-    lastRenderStartRef.current = performance.now();
-  });
-
-  // Track render completion and calculate metrics
-  useEffect(() => {
-    if (!isTracking) return;
-
-    const renderEndTime = performance.now();
-    const renderDuration = renderEndTime - lastRenderStartRef.current;
-
-    // Update render count
-    setRenderCount((prev) => prev + 1);
-
-    // Update render times
-    renderTimesRef.current.push(renderDuration);
-
-    // Keep only last 100 render times to prevent memory leak
-    if (renderTimesRef.current.length > 100) {
-      renderTimesRef.current.shift();
-    }
-
-    // Calculate average
-    const avg =
-      renderTimesRef.current.reduce((sum, time) => sum + time, 0) /
-      renderTimesRef.current.length;
-
-    setAvgRenderTime(avg);
-    setLastRenderTime(renderDuration);
-
-    // Track memory usage if enabled and available
-    if (trackMemory && "memory" in performance) {
-      const memory = (performance as PerformanceWithMemory).memory;
-      if (memory) {
-        setMemoryUsage(memory.usedJSHeapSize);
-      }
-    }
-
-    // Auto-report to context
-    if (autoReport) {
-      const performanceScore = calculatePerformanceScore(
-        avg,
-        memoryUsage,
-        renderCount
-      );
-
-      const metrics: ComponentPerformanceMetrics = {
-        componentName,
-        renderCount: renderCount + 1,
-        avgRenderTime: avg,
-        lastRenderTime: renderDuration,
-        totalRenderTime: renderTimesRef.current.reduce((sum, t) => sum + t, 0),
-        memoryUsage: trackMemory ? memoryUsage : undefined,
-        performanceScore,
-        lastRenderTimestamp: Date.now(),
-        renderHistory: renderTimesRef.current.map((time, index) => ({
-          name: `${componentName}-render-${index}`,
-          startTime: mountTimeRef.current + index * 100, // Approximate
-          duration: time,
-          timestamp: Date.now() - (renderTimesRef.current.length - index) * 100,
-        })),
-        isTracking,
-      };
-
-      updateComponentMetric(metrics);
-    }
-  }, [
-    isTracking,
+  // Latest options, readable from the publish timer without re-arming it.
+  const optionsRef = useRef({
     componentName,
     trackMemory,
-    memoryUsage,
-    renderCount,
     autoReport,
     updateComponentMetric,
-  ]);
+  });
+  useEffect(() => {
+    optionsRef.current = {
+      componentName,
+      trackMemory,
+      autoReport,
+      updateComponentMetric,
+    };
+  }, [componentName, trackMemory, autoReport, updateComponentMetric]);
 
-  // Start tracking
+  // Read during the render phase so the delta below spans this component's
+  // render plus commit, rather than the gap between two effects in one commit.
+  const renderStart = performance.now();
+
+  // Record one sample per commit. Intentionally has no dependency array: it must
+  // run after every render, which is only safe because it never calls setState.
+  useLayoutEffect(() => {
+    if (!isTracking) return;
+
+    // Skip the render we caused ourselves when publishing.
+    if (selfInducedRenderRef.current) {
+      selfInducedRenderRef.current = false;
+      return;
+    }
+
+    const duration = performance.now() - renderStart;
+
+    renderCountRef.current += 1;
+    lastRenderTimeRef.current = duration;
+    lastRenderTimestampRef.current = Date.now();
+    totalRenderTimeRef.current += duration;
+
+    renderSamplesRef.current.push({
+      name: `${optionsRef.current.componentName}-render-${renderCountRef.current}`,
+      startTime: renderStart,
+      duration,
+      timestamp: Date.now(),
+    });
+
+    if (renderSamplesRef.current.length > MAX_SAMPLES) {
+      renderSamplesRef.current.shift();
+    }
+
+    if (optionsRef.current.trackMemory && "memory" in performance) {
+      const memory = (performance as PerformanceWithMemory).memory;
+      if (memory) {
+        memoryUsageRef.current = memory.usedJSHeapSize;
+      }
+    }
+  });
+
+  const buildMetrics = useCallback((): ComponentPerformanceMetrics => {
+    const samples = renderSamplesRef.current;
+    const avg = samples.length
+      ? samples.reduce((sum, sample) => sum + sample.duration, 0) /
+        samples.length
+      : 0;
+
+    return {
+      componentName: optionsRef.current.componentName,
+      renderCount: renderCountRef.current,
+      avgRenderTime: avg,
+      lastRenderTime: lastRenderTimeRef.current,
+      totalRenderTime: totalRenderTimeRef.current,
+      memoryUsage: optionsRef.current.trackMemory
+        ? memoryUsageRef.current
+        : undefined,
+      // Bundle size is not observable from inside a component, so it is passed
+      // as 0 rather than conflated with heap usage, which is process-wide.
+      performanceScore: calculatePerformanceScore(
+        avg,
+        0,
+        renderCountRef.current
+      ),
+      lastRenderTimestamp: lastRenderTimestampRef.current,
+      renderHistory: [...samples],
+      isTracking,
+    };
+  }, [isTracking]);
+
+  // Publish accumulated samples on an interval. This is the only place that
+  // writes state, which keeps measurement and re-rendering decoupled.
+  useEffect(() => {
+    if (!isTracking) return;
+
+    const publish = () => {
+      // Nothing new since the last publish: stay quiet so an idle component settles.
+      if (renderCountRef.current === publishedCountRef.current) return;
+      publishedCountRef.current = renderCountRef.current;
+
+      const metrics = buildMetrics();
+
+      selfInducedRenderRef.current = true;
+      setRenderCount(metrics.renderCount);
+      setAvgRenderTime(metrics.avgRenderTime);
+      setLastRenderTime(metrics.lastRenderTime);
+      if (optionsRef.current.trackMemory) {
+        setMemoryUsage(memoryUsageRef.current);
+      }
+
+      if (optionsRef.current.autoReport) {
+        optionsRef.current.updateComponentMetric(metrics);
+      }
+    };
+
+    const interval = window.setInterval(publish, publishInterval);
+    return () => window.clearInterval(interval);
+  }, [isTracking, publishInterval, buildMetrics]);
+
   const startTracking = useCallback(() => {
     setIsTracking(true);
   }, []);
 
-  // Stop tracking
   const stopTracking = useCallback(() => {
     setIsTracking(false);
   }, []);
 
-  // Reset metrics
   const resetMetrics = useCallback(() => {
+    renderSamplesRef.current = [];
+    renderCountRef.current = 0;
+    totalRenderTimeRef.current = 0;
+    lastRenderTimeRef.current = 0;
+    lastRenderTimestampRef.current = Date.now();
+    memoryUsageRef.current = 0;
+    publishedCountRef.current = 0;
+
+    selfInducedRenderRef.current = true;
     setRenderCount(0);
     setAvgRenderTime(0);
     setLastRenderTime(0);
     setMemoryUsage(0);
-    renderTimesRef.current = [];
-    mountTimeRef.current = Date.now();
   }, []);
-
-  // Get full metrics object
-  const getMetrics = useCallback((): ComponentPerformanceMetrics => {
-    const performanceScore = calculatePerformanceScore(
-      avgRenderTime,
-      memoryUsage,
-      renderCount
-    );
-
-    return {
-      componentName,
-      renderCount,
-      avgRenderTime,
-      lastRenderTime,
-      totalRenderTime: renderTimesRef.current.reduce((sum, t) => sum + t, 0),
-      memoryUsage: trackMemory ? memoryUsage : undefined,
-      performanceScore,
-      lastRenderTimestamp: Date.now(),
-      renderHistory: renderTimesRef.current.map((time, index) => ({
-        name: `${componentName}-render-${index}`,
-        startTime: mountTimeRef.current + index * 100,
-        duration: time,
-        timestamp: Date.now() - (renderTimesRef.current.length - index) * 100,
-      })),
-      isTracking,
-    };
-  }, [
-    componentName,
-    renderCount,
-    avgRenderTime,
-    lastRenderTime,
-    memoryUsage,
-    trackMemory,
-    isTracking,
-  ]);
 
   const performanceScore = calculatePerformanceScore(
     avgRenderTime,
-    memoryUsage,
+    0,
     renderCount
   );
 
@@ -232,7 +274,7 @@ export function useComponentPerformance({
     startTracking,
     stopTracking,
     resetMetrics,
-    getMetrics,
+    getMetrics: buildMetrics,
   };
 }
 
