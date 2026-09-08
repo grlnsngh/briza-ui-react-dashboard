@@ -16,7 +16,7 @@
 
 import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-import { usePerformanceContext } from "./contexts";
+import { usePerformanceState } from "./contexts";
 import { useCoreWebVitals } from "./hooks";
 import { ROUTES } from "./utils/constants";
 import { Layout, Loading } from "./components";
@@ -30,35 +30,52 @@ const WebVitals = lazy(() => import("./pages/WebVitals"));
 const RerenderTracker = lazy(() => import("./pages/RerenderTracker"));
 const ThemePerformance = lazy(() => import("./pages/ThemePerformance"));
 
-function App() {
-  const { state } = usePerformanceContext();
+/**
+ * Starts Web Vitals monitoring and renders nothing.
+ *
+ * This lives apart from `App` on purpose. Reading the performance state means
+ * re-rendering on every measurement, and `App` owns the route tree — so that
+ * subscription used to re-render every page each time a metric landed. Holding
+ * it in a leaf keeps the churn to a component with no output.
+ */
+function WebVitalsMonitor() {
+  const { dashboard } = usePerformanceState();
 
-  // Initialize Web Vitals monitoring
   useCoreWebVitals({
-    enableRealtime: state.dashboard.isRealTimeEnabled,
+    enableRealtime: dashboard.isRealTimeEnabled,
   });
 
+  return null;
+}
+
+function App() {
   return (
-    <Layout>
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route path={ROUTES.HOME} element={<Dashboard />} />
-          <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
-          <Route path={ROUTES.SHOWCASE} element={<BrizaShowcase />} />
-          <Route
-            path={ROUTES.COMPONENT_MONITOR}
-            element={<ComponentMonitor />}
-          />
-          <Route path={ROUTES.BUNDLE_ANALYZER} element={<BundleAnalyzer />} />
-          <Route path={ROUTES.WEB_VITALS} element={<WebVitals />} />
-          <Route path={ROUTES.RERENDER_TRACKER} element={<RerenderTracker />} />
-          <Route
-            path={ROUTES.THEME_PERFORMANCE}
-            element={<ThemePerformance />}
-          />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <>
+      <WebVitalsMonitor />
+      <Layout>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path={ROUTES.HOME} element={<Dashboard />} />
+            <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+            <Route path={ROUTES.SHOWCASE} element={<BrizaShowcase />} />
+            <Route
+              path={ROUTES.COMPONENT_MONITOR}
+              element={<ComponentMonitor />}
+            />
+            <Route path={ROUTES.BUNDLE_ANALYZER} element={<BundleAnalyzer />} />
+            <Route path={ROUTES.WEB_VITALS} element={<WebVitals />} />
+            <Route
+              path={ROUTES.RERENDER_TRACKER}
+              element={<RerenderTracker />}
+            />
+            <Route
+              path={ROUTES.THEME_PERFORMANCE}
+              element={<ThemePerformance />}
+            />
+          </Routes>
+        </Suspense>
+      </Layout>
+    </>
   );
 }
 

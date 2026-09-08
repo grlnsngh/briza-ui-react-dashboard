@@ -3,8 +3,13 @@
  */
 
 export { PerformanceProvider } from "./PerformanceContext";
-export { usePerformanceContext } from "./usePerformanceContext";
+export {
+  usePerformanceContext,
+  usePerformanceActions,
+  usePerformanceState,
+} from "./usePerformanceContext";
 export type {
   PerformanceState,
+  PerformanceActions,
   PerformanceContextValue,
 } from "./performanceContextValue";

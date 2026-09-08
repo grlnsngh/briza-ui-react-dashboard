@@ -4,12 +4,17 @@
  * Global state management for performance monitoring data using React Context API.
  * Provides performance metrics, filters, and actions to all child components.
  *
+ * State and actions are published through two separate contexts so that the
+ * components doing the measuring do not re-render on the measurements they
+ * record. See `performanceContextValue.ts` for the split, and
+ * `usePerformanceContext.ts` for which accessor to reach for.
+ *
  * @example
  * ```tsx
- * import { usePerformanceContext } from '@contexts/PerformanceContext';
+ * import { usePerformanceContext } from '@contexts';
  *
  * function MyComponent() {
- *   const { metrics, addMeasurement, filters, setFilters } = usePerformanceContext();
+ *   const { state, addMeasurement, setFilters } = usePerformanceContext();
  *   // Use performance data and actions
  * }
  * ```
@@ -20,6 +25,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   type ReactNode,
 } from "react";
 import type {
@@ -32,9 +38,17 @@ import type {
 import { getStorageItem, setStorageItem } from "../utils";
 import { STORAGE_KEYS } from "../utils/constants";
 import {
-  PerformanceContext,
+  PerformanceActionsContext,
+  PerformanceStateContext,
+  type PerformanceActions,
   type PerformanceState,
 } from "./performanceContextValue";
+
+/** How often accumulated metrics are written to localStorage. */
+const PERSIST_INTERVAL_MS = 30000;
+
+/** Persisted metrics older than this are ignored on load. */
+const PERSIST_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 // =============================================================================
 // ACTIONS
@@ -216,19 +230,22 @@ interface PerformanceProviderProps {
 export function PerformanceProvider({ children }: PerformanceProviderProps) {
   const [state, dispatch] = useReducer(performanceReducer, initialState);
 
+  // Mirror of the latest state, so the selectors below and the persistence
+  // timer can read it without closing over it. Assigned during render rather
+  // than in an effect because the selectors are called during a consumer's
+  // render, which happens before the provider's own effects run.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   // Actions
+  const getState = useCallback(() => stateRef.current, []);
+
   const addMeasurement = useCallback((measurement: PerformanceMeasurement) => {
     dispatch({ type: "ADD_MEASUREMENT", payload: measurement });
   }, []);
 
   const updateComponentMetric = useCallback(
     (metric: ComponentPerformanceMetrics) => {
-      // Log in production for debugging
-      if (import.meta.env.PROD) {
-        console.log(
-          `[PerformanceContext] Updating metric: ${metric.componentName}, renders: ${metric.renderCount}`
-        );
-      }
       dispatch({ type: "UPDATE_COMPONENT_METRIC", payload: metric });
     },
     []
@@ -274,17 +291,16 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
     dispatch({ type: "TOGGLE_DEMO_MODE", payload: enabled });
   }, []);
 
-  // Selectors
-  const getComponentMetric = useCallback(
-    (componentName: string) => {
-      return state.componentMetrics.get(componentName);
-    },
-    [state.componentMetrics]
-  );
+  // Selectors. These read `stateRef` rather than `state` so that they stay
+  // referentially stable and can live in the actions context.
+  const getComponentMetric = useCallback((componentName: string) => {
+    return stateRef.current.componentMetrics.get(componentName);
+  }, []);
 
   const getFilteredComponents = useCallback(() => {
-    const components = Array.from(state.componentMetrics.values());
-    const { filters } = state.dashboard;
+    const { componentMetrics, dashboard } = stateRef.current;
+    const components = Array.from(componentMetrics.values());
+    const { filters } = dashboard;
 
     return components.filter((metric) => {
       // Filter by component name
@@ -307,21 +323,31 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
 
       return true;
     });
-  }, [state.componentMetrics, state.dashboard]);
+  }, []);
 
-  // Persist data to localStorage periodically
+  // Persist data to localStorage periodically.
+  //
+  // The timer is armed once. It used to depend on the metrics it was saving,
+  // so under active monitoring the effect was torn down and rebuilt faster than
+  // the 30s interval could elapse and nothing was ever written.
   useEffect(() => {
-    const interval = setInterval(() => {
-      const data = {
-        componentMetrics: Array.from(state.componentMetrics.entries()),
-        webVitals: state.webVitals,
+    const persist = () => {
+      const { componentMetrics, webVitals } = stateRef.current;
+      setStorageItem(STORAGE_KEYS.PERFORMANCE_DATA, {
+        componentMetrics: Array.from(componentMetrics.entries()),
+        webVitals,
         timestamp: Date.now(),
-      };
-      setStorageItem(STORAGE_KEYS.PERFORMANCE_DATA, data);
-    }, 30000); // Every 30 seconds
+      });
+    };
 
-    return () => clearInterval(interval);
-  }, [state.componentMetrics, state.webVitals]);
+    const interval = window.setInterval(persist, PERSIST_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(interval);
+      // Save whatever accumulated since the last tick.
+      persist();
+    };
+  }, []);
 
   // Load persisted data on mount
   useEffect(() => {
@@ -331,8 +357,7 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
       timestamp: number;
     } | null>(STORAGE_KEYS.PERFORMANCE_DATA, null);
 
-    if (persisted && Date.now() - persisted.timestamp < 24 * 60 * 60 * 1000) {
-      // Load if less than 24 hours old
+    if (persisted && Date.now() - persisted.timestamp < PERSIST_MAX_AGE_MS) {
       persisted.componentMetrics.forEach(([, metric]) => {
         updateComponentMetric(metric);
       });
@@ -343,9 +368,11 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
-  const value = useMemo(
+  // Every member is stable, so this object is created once. Consumers that only
+  // write metrics can subscribe here and stay out of the re-render path.
+  const actions = useMemo<PerformanceActions>(
     () => ({
-      state,
+      getState,
       addMeasurement,
       updateComponentMetric,
       updateWebVitals,
@@ -362,7 +389,7 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
       toggleDemoMode,
     }),
     [
-      state,
+      getState,
       addMeasurement,
       updateComponentMetric,
       updateWebVitals,
@@ -381,8 +408,10 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
   );
 
   return (
-    <PerformanceContext.Provider value={value}>
-      {children}
-    </PerformanceContext.Provider>
+    <PerformanceActionsContext.Provider value={actions}>
+      <PerformanceStateContext.Provider value={state}>
+        {children}
+      </PerformanceStateContext.Provider>
+    </PerformanceActionsContext.Provider>
   );
 }
