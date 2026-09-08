@@ -3,6 +3,17 @@
  *
  * Wraps any component with React Profiler to automatically capture
  * performance metrics without requiring manual hook usage.
+ *
+ * Measurement model
+ * -----------------
+ * Running totals live in a ref and are advanced once per commit. A short debounce
+ * publishes them to the context, so a burst of renders costs one state update
+ * instead of one per render.
+ *
+ * The totals must not be derived from context state: the publish is debounced, so
+ * every render inside a window would read the same not-yet-updated base and the
+ * count would collapse to one per window. The ref is the only source of truth for
+ * accumulation; context is read once, to seed it.
  */
 
 import {
@@ -13,8 +24,17 @@ import {
   useCallback,
   useEffect,
 } from "react";
-import { usePerformanceContext } from "../contexts";
-import type { ComponentPerformanceMetrics } from "../types/performance";
+import { usePerformanceActions } from "../contexts";
+import type {
+  ComponentPerformanceMetrics,
+  PerformanceMeasurement,
+} from "../types/performance";
+
+/** Quiet period before accumulated renders are published to the context. */
+const PUBLISH_DEBOUNCE_MS = 100;
+
+/** Number of individual render samples retained per component. */
+const MAX_RENDER_HISTORY = 50;
 
 interface MonitoredComponentProps {
   /** Name of the component being monitored */
@@ -25,6 +45,31 @@ interface MonitoredComponentProps {
   enabled?: boolean;
 }
 
+/** Running totals for one profiler id. Mutated in place, never rendered. */
+interface RenderTotals {
+  renderCount: number;
+  totalRenderTime: number;
+  lastRenderTime: number;
+  lastRenderTimestamp: number;
+  renderHistory: PerformanceMeasurement[];
+  memoryUsage?: number;
+  performanceScore: number;
+}
+
+function emptyMetric(componentName: string): ComponentPerformanceMetrics {
+  return {
+    componentName,
+    renderCount: 0,
+    avgRenderTime: 0,
+    lastRenderTime: 0,
+    totalRenderTime: 0,
+    performanceScore: 100,
+    lastRenderTimestamp: Date.now(),
+    renderHistory: [],
+    isTracking: true,
+  };
+}
+
 /**
  * Wraps children with React Profiler for automatic performance monitoring
  */
@@ -33,70 +78,64 @@ export function MonitoredComponent({
   children,
   enabled = true,
 }: MonitoredComponentProps) {
-  // Always call hooks at the top level
-  const context = usePerformanceContext();
-  const { updateComponentMetric, state } = context;
+  // Actions only: this component records measurements, so subscribing to them
+  // would make it re-render on its own output and measure that render too.
+  const { updateComponentMetric, getComponentMetric } = usePerformanceActions();
 
-  // Use ref to debounce updates and prevent infinite loops
-  const updateTimerRef = useRef<number | null>(null);
-  const localMetricsRef = useRef<Map<string, ComponentPerformanceMetrics>>(
-    new Map()
-  );
-  const hasInitializedRef = useRef(false);
+  const totalsRef = useRef<Map<string, RenderTotals>>(new Map());
+  const pendingRef = useRef<Set<string>>(new Set());
+  const publishTimerRef = useRef<number | null>(null);
 
-  // Debounced update function to batch metric updates
-  const debouncedUpdate = useCallback(
-    (metric: ComponentPerformanceMetrics) => {
-      // Store metric locally first
-      localMetricsRef.current.set(metric.componentName, metric);
+  const flush = useCallback(() => {
+    publishTimerRef.current = null;
 
-      // Clear existing timer
-      if (updateTimerRef.current) {
-        window.clearTimeout(updateTimerRef.current);
-      }
+    pendingRef.current.forEach((componentName) => {
+      const totals = totalsRef.current.get(componentName);
+      if (!totals) return;
 
-      // Batch update after 100ms of no new renders
-      updateTimerRef.current = window.setTimeout(() => {
-        const metricsToUpdate = Array.from(localMetricsRef.current.values());
-        metricsToUpdate.forEach((m) => updateComponentMetric(m));
-        localMetricsRef.current.clear();
-      }, 100);
-    },
-    [updateComponentMetric]
-  );
+      updateComponentMetric({
+        componentName,
+        renderCount: totals.renderCount,
+        avgRenderTime: totals.renderCount
+          ? totals.totalRenderTime / totals.renderCount
+          : 0,
+        lastRenderTime: totals.lastRenderTime,
+        totalRenderTime: totals.totalRenderTime,
+        memoryUsage: totals.memoryUsage,
+        performanceScore: totals.performanceScore,
+        lastRenderTimestamp: totals.lastRenderTimestamp,
+        renderHistory: [...totals.renderHistory],
+        isTracking: true,
+      });
+    });
 
-  // Initialize component metric on first render
-  // This ensures the component is registered even if Profiler doesn't fire immediately
+    pendingRef.current.clear();
+  }, [updateComponentMetric]);
+
+  // Register the component up front so it appears in the dashboard even if the
+  // profiler has not committed a sample yet.
   useEffect(() => {
-    if (!hasInitializedRef.current && enabled) {
-      hasInitializedRef.current = true;
+    if (!enabled) return;
+    if (getComponentMetric(name)) return;
 
-      // Create initial metric if it doesn't exist
-      if (!state.componentMetrics.has(name)) {
-        const initialMetric: ComponentPerformanceMetrics = {
-          componentName: name,
-          renderCount: 0,
-          avgRenderTime: 0,
-          lastRenderTime: 0,
-          totalRenderTime: 0,
-          performanceScore: 100,
-          lastRenderTimestamp: Date.now(),
-          renderHistory: [],
-          isTracking: true,
-        };
-        updateComponentMetric(initialMetric);
+    updateComponentMetric(emptyMetric(name));
+  }, [name, enabled, getComponentMetric, updateComponentMetric]);
 
-        // Log for debugging in production
-        if (import.meta.env.PROD) {
-          console.log(`[MonitoredComponent] Initialized: ${name}`);
-        }
+  // Publish anything still buffered, then drop the timer. Without this the
+  // pending timeout outlives the component and fires against a dead closure.
+  useEffect(() => {
+    return () => {
+      if (publishTimerRef.current !== null) {
+        window.clearTimeout(publishTimerRef.current);
+        publishTimerRef.current = null;
+        flush();
       }
-    }
-  }, [name, enabled, state.componentMetrics, updateComponentMetric]);
+    };
+  }, [flush]);
 
   const onRenderCallback: ProfilerOnRenderCallback = (
     id,
-    phase,
+    _phase,
     actualDuration,
     _baseDuration,
     startTime,
@@ -104,41 +143,41 @@ export function MonitoredComponent({
   ) => {
     if (!enabled) return;
 
-    // Log in production for debugging
-    if (import.meta.env.PROD && phase === "mount") {
-      console.log(
-        `[Profiler] ${id} mounted - duration: ${actualDuration.toFixed(2)}ms`
-      );
+    let totals = totalsRef.current.get(id);
+    if (!totals) {
+      // Seed once from whatever the store already holds — a restored session or
+      // an earlier mount — so remounting continues the count instead of
+      // restarting it. Every later sample comes off the ref.
+      const existing = getComponentMetric(id);
+      totals = {
+        renderCount: existing?.renderCount ?? 0,
+        totalRenderTime: existing?.totalRenderTime ?? 0,
+        lastRenderTime: existing?.lastRenderTime ?? 0,
+        lastRenderTimestamp: existing?.lastRenderTimestamp ?? Date.now(),
+        renderHistory: existing ? [...existing.renderHistory] : [],
+        memoryUsage: existing?.memoryUsage,
+        performanceScore: existing?.performanceScore ?? 100,
+      };
+      totalsRef.current.set(id, totals);
     }
 
-    // Get existing data or create new
-    const currentMetric = state.componentMetrics.get(id) || {
-      componentName: id,
-      renderCount: 0,
-      avgRenderTime: 0,
-      lastRenderTime: 0,
-      totalRenderTime: 0,
-      performanceScore: 100,
-      lastRenderTimestamp: Date.now(),
-      renderHistory: [],
-      isTracking: true,
-    };
+    totals.renderCount += 1;
+    totals.totalRenderTime += actualDuration;
+    totals.lastRenderTime = actualDuration;
+    totals.lastRenderTimestamp = commitTime;
 
-    // Calculate new metrics
-    const newRenderCount = currentMetric.renderCount + 1;
-    const newTotalRenderTime = currentMetric.totalRenderTime + actualDuration;
-    const newAvgRenderTime = newTotalRenderTime / newRenderCount;
-
-    // Add to render history (keep last 50)
-    const newRenderHistory = [
-      ...currentMetric.renderHistory,
-      {
-        name: `${id}-render-${newRenderCount}`,
-        startTime,
-        duration: actualDuration,
-        timestamp: commitTime,
-      },
-    ].slice(-50);
+    totals.renderHistory.push({
+      name: `${id}-render-${totals.renderCount}`,
+      startTime,
+      duration: actualDuration,
+      timestamp: commitTime,
+    });
+    if (totals.renderHistory.length > MAX_RENDER_HISTORY) {
+      totals.renderHistory.splice(
+        0,
+        totals.renderHistory.length - MAX_RENDER_HISTORY
+      );
+    }
 
     // Calculate performance score
     let score = 100;
@@ -147,33 +186,25 @@ export function MonitoredComponent({
     else if (actualDuration > 4) score -= 5;
 
     // Track memory if available
-    let memoryUsage: number | undefined;
     if ("memory" in performance) {
       const memory = (performance as { memory?: { usedJSHeapSize: number } })
         .memory;
       if (memory) {
-        memoryUsage = memory.usedJSHeapSize;
+        totals.memoryUsage = memory.usedJSHeapSize;
         // Penalize high memory usage
-        if (memoryUsage && memoryUsage > 1000000) score -= 20;
-        else if (memoryUsage && memoryUsage > 500000) score -= 10;
+        if (totals.memoryUsage > 1000000) score -= 20;
+        else if (totals.memoryUsage > 500000) score -= 10;
       }
     }
 
-    const updatedMetric: ComponentPerformanceMetrics = {
-      componentName: id,
-      renderCount: newRenderCount,
-      avgRenderTime: newAvgRenderTime,
-      lastRenderTime: actualDuration,
-      totalRenderTime: newTotalRenderTime,
-      memoryUsage,
-      performanceScore: Math.max(0, Math.min(100, score)),
-      lastRenderTimestamp: commitTime,
-      renderHistory: newRenderHistory,
-      isTracking: true,
-    };
+    totals.performanceScore = Math.max(0, Math.min(100, score));
 
-    // Use debounced update to prevent infinite render loops
-    debouncedUpdate(updatedMetric);
+    // Batch: a burst of renders publishes once, after it settles.
+    pendingRef.current.add(id);
+    if (publishTimerRef.current !== null) {
+      window.clearTimeout(publishTimerRef.current);
+    }
+    publishTimerRef.current = window.setTimeout(flush, PUBLISH_DEBOUNCE_MS);
   };
 
   return (

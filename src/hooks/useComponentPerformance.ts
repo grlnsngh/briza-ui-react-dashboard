@@ -38,7 +38,7 @@ import type {
   ComponentPerformanceMetrics,
   PerformanceMeasurement,
 } from "../types/performance";
-import { usePerformanceContext } from "../contexts";
+import { usePerformanceActions } from "../contexts";
 import { calculatePerformanceScore } from "../utils";
 
 // =============================================================================
@@ -98,7 +98,9 @@ export function useComponentPerformance({
   autoReport = true,
   publishInterval = 1000,
 }: UseComponentPerformanceOptions): UseComponentPerformanceReturn {
-  const { updateComponentMetric } = usePerformanceContext();
+  // Actions only: a metrics hook that re-rendered its host on every
+  // measurement would feed on its own output.
+  const { updateComponentMetric } = usePerformanceActions();
 
   const [renderCount, setRenderCount] = useState(0);
   const [avgRenderTime, setAvgRenderTime] = useState(0);

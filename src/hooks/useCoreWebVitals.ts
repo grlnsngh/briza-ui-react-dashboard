@@ -25,7 +25,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { onCLS, onLCP, onFCP, onTTFB, onINP } from "web-vitals";
 import type { WebVitalMetric, WebVitalsData } from "../types/performance";
-import { usePerformanceContext } from "../contexts";
+import { usePerformanceActions } from "../contexts";
 import { getWebVitalRating, calculateWebVitalsScore } from "../utils";
 
 // =============================================================================
@@ -86,7 +86,8 @@ export function useCoreWebVitals({
   reportInterval = 5000,
   onMetricUpdate,
 }: UseCoreWebVitalsOptions = {}): UseCoreWebVitalsReturn {
-  const { updateWebVitals } = usePerformanceContext();
+  // Actions only, so reporting a vital does not re-render the reporter.
+  const { updateWebVitals } = usePerformanceActions();
 
   const [lcp, setLcp] = useState<WebVitalMetric | null>(null);
   const [fid] = useState<WebVitalMetric | null>(null); // FID is deprecated, kept for compatibility

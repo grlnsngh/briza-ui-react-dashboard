@@ -4,9 +4,9 @@
  * Monitors performance metrics and generates alerts
  */
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { usePerformanceContext } from "../contexts";
+import { usePerformanceActions } from "../contexts";
 import { getAllAlerts } from "../lib/performance/alerts";
 import type { PerformanceAlert, AlertThresholds } from "../types/alerts";
 import { DEFAULT_THRESHOLDS } from "../types/alerts";
@@ -29,7 +29,10 @@ export function usePerformanceAlerts(
     enabled = true,
   } = options;
 
-  const { state } = usePerformanceContext();
+  // Actions only. Alerts are recomputed on a timer, so subscribing to the
+  // metrics here would re-render Layout — and with it the whole route tree —
+  // on every measurement, purely to keep a value this hook reads on a schedule.
+  const { getState } = usePerformanceActions();
   const location = useLocation();
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([]);
 
@@ -41,13 +44,25 @@ export function usePerformanceAlerts(
     [customThresholds]
   );
 
-  const checkAlerts = useCallback(() => {
-    if (!enabled) return;
+  // Latest options for the interval below, read through a ref so that
+  // `checkAlerts` stays referentially stable.
+  const optionsRef = useRef({ thresholds, enabled, getState });
+  optionsRef.current = { thresholds, enabled, getState };
 
+  const checkAlerts = useCallback(() => {
+    const {
+      thresholds: latestThresholds,
+      enabled: isEnabled,
+      getState: readState,
+    } = optionsRef.current;
+
+    if (!isEnabled) return;
+
+    const { componentMetrics, webVitals } = readState();
     const newAlerts = getAllAlerts(
-      state.componentMetrics,
-      state.webVitals,
-      thresholds
+      componentMetrics,
+      webVitals,
+      latestThresholds
     );
 
     setAlerts((prev) => {
@@ -83,18 +98,22 @@ export function usePerformanceAlerts(
 
       return Array.from(alertMap.values());
     });
-  }, [enabled, state.componentMetrics, state.webVitals, thresholds]);
+  }, []);
 
+  // `checkAlerts` used to depend on the metrics it reads, so this effect was
+  // torn down and rebuilt on every measurement: the interval never survived
+  // long enough to fire, and the immediate check below ran on every update
+  // instead — the opposite of the overhead reduction `checkInterval` promises.
+  // With a stable `checkAlerts` the timer is armed once per enable/interval.
   useEffect(() => {
     if (!enabled) return;
 
-    // Check immediately
+    // Seed once on arm, so the panel is not blank for a full interval.
     checkAlerts();
 
-    // Set up interval
-    const interval = setInterval(checkAlerts, checkInterval);
+    const interval = window.setInterval(checkAlerts, checkInterval);
 
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [checkAlerts, checkInterval, enabled]);
 
   const dismissAlert = useCallback((alertId: string) => {
