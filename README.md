@@ -472,9 +472,21 @@ npm run lint         # Run ESLint on codebase
 
 ## 🚀 Deployment
 
-This project is deployed on **Vercel**. The production build is automatically deployed from the `main` branch.
+This project is deployed on **Vercel**. The production build is automatically deployed from the **`prod`** branch — not `main`.
 
 **Live URL:** [https://briza-ui-react-dashboard.vercel.app/](https://briza-ui-react-dashboard.vercel.app/)
+
+### Publishing to Production
+
+Day-to-day work merges into `main`, which does **not** deploy. Publishing is a separate, deliberate step: fast-forward `prod` to whatever you want live.
+
+```bash
+# Publish the current main to production
+git fetch origin
+git push origin origin/main:refs/heads/prod
+```
+
+Vercel picks up the push to `prod` and builds automatically. Because `prod` only ever moves forward to a commit already on `main`, the push is a fast-forward and needs no force.
 
 ### Build Commands
 

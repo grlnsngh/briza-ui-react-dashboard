@@ -236,17 +236,20 @@ Or via Vercel Dashboard:
 
 ## Continuous Deployment
 
-Vercel auto-deploys on every push to main branch:
+Vercel's production branch for this project is **`prod`**, not `main`. Merging to `main` does not deploy; publishing is a separate, deliberate step.
 
 ```bash
-# Development deployment
+# Preview deployment
 git push origin feature-branch
 # Creates preview URL
 
-# Production deployment
-git push origin main
+# Production deployment: fast-forward prod to the commit you want live
+git fetch origin
+git push origin origin/main:refs/heads/prod
 # Deploys to production
 ```
+
+Because `prod` only ever moves forward to a commit already on `main`, the push is a fast-forward and needs no force.
 
 ---
 
