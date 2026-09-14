@@ -99,6 +99,9 @@ export function useCoreWebVitals({
 
   const metricsRef = useRef<WebVitalsData | null>(null);
   const reportTimerRef = useRef<number | undefined>(undefined);
+  const latestMetricsRef = useRef<
+    Pick<WebVitalsData, "lcp" | "fid" | "cls" | "fcp" | "ttfb" | "inp">
+  >({ lcp, fid, cls, fcp, ttfb, inp });
 
   // Convert web-vitals Metric to WebVitalMetric
   const convertMetric = useCallback((metric: Metric): WebVitalMetric => {
@@ -153,7 +156,8 @@ export function useCoreWebVitals({
   const stopMonitoring = useCallback(() => {
     setIsMonitoring(false);
     if (reportTimerRef.current) {
-      clearInterval(reportTimerRef.current);
+      window.clearInterval(reportTimerRef.current);
+      reportTimerRef.current = undefined;
     }
   }, []);
 
@@ -205,11 +209,25 @@ export function useCoreWebVitals({
     // Metrics are automatically collected once per page load
   }, [isMonitoring, convertMetric, updateMetric]);
 
-  // Calculate overall score and report to context
+  // Latest measurements for the report timer below. The timer must not depend
+  // on them, so they reach it through a ref instead of a closure.
+  useEffect(() => {
+    latestMetricsRef.current = { lcp, fid, cls, fcp, ttfb, inp };
+  }, [lcp, fid, cls, fcp, ttfb, inp]);
+
+  // Calculate overall score and report to context.
+  //
+  // The interval is armed once per monitoring session. This effect used to
+  // depend on the metrics it reports, so every incoming measurement tore the
+  // timer down and started a fresh one: while vitals were still arriving faster
+  // than `reportInterval` the interval never survived long enough to fire, and
+  // the context got nothing during exactly the window it was meant to cover.
   useEffect(() => {
     if (!isMonitoring) return;
 
-    reportTimerRef.current = setInterval(() => {
+    reportTimerRef.current = window.setInterval(() => {
+      const { lcp, fid, cls, fcp, ttfb, inp } = latestMetricsRef.current;
+
       const score = calculateWebVitalsScore({
         lcp: lcp?.value,
         fid: fid?.value,
@@ -233,20 +251,11 @@ export function useCoreWebVitals({
 
     return () => {
       if (reportTimerRef.current) {
-        clearInterval(reportTimerRef.current);
+        window.clearInterval(reportTimerRef.current);
+        reportTimerRef.current = undefined;
       }
     };
-  }, [
-    isMonitoring,
-    lcp,
-    fid,
-    cls,
-    fcp,
-    ttfb,
-    inp,
-    reportInterval,
-    updateWebVitals,
-  ]);
+  }, [isMonitoring, reportInterval, updateWebVitals]);
 
   // Calculate current overall score
   const overallScore = calculateWebVitalsScore({
