@@ -1,27 +1,28 @@
 /**
- * Component Performance Monitor Page
+ * Component Monitor
  *
- * Comprehensive monitoring dashboard for tracking component performance metrics:
- * - Real-time performance data for all monitored components
- * - Render time charts and trends
- * - Memory usage tracking
- * - Performance scores and comparisons
- * - Filtering and search capabilities
+ * The full table of what has been measured. The dashboard says which
+ * components are worth attention; this page is where you read the numbers and
+ * sort by whichever one you care about.
+ *
+ * Selecting a row opens its render history rather than navigating away, so
+ * comparing two components is two clicks instead of two page loads.
  */
 
 import { useState, useMemo } from "react";
-import { usePerformanceContext } from "../contexts";
+import { usePerformanceState } from "../contexts";
+import { formatDuration, formatBytes, formatNumber } from "../utils/formatters";
+import { PerformanceLineChart, PerformanceBarChart } from "../components/charts";
+import { scoreColor } from "../components/charts/chartTheme";
 import {
-  formatDuration,
-  formatBytes,
-  formatNumber,
-  getScoreColor,
-} from "../utils/formatters";
-import {
-  PerformanceLineChart,
-  PerformanceBarChart,
-} from "../components/charts";
-import { ComponentLoadingIndicator } from "../components/common";
+  ComponentLoadingIndicator,
+  PageHeader,
+  Panel,
+  Metric,
+  ScoreBar,
+  Button,
+  Icon,
+} from "../components/common";
 import {
   BRIZA_UI_COMPONENTS_EXPECTED,
   DASHBOARD_COMPONENTS,
@@ -36,258 +37,329 @@ type SortField =
   | "memoryUsage";
 type SortDirection = "asc" | "desc";
 
+const columns: {
+  field: SortField;
+  label: string;
+  align: "left" | "right";
+}[] = [
+  { field: "name", label: "Component", align: "left" },
+  { field: "renderCount", label: "Renders", align: "right" },
+  { field: "avgRenderTime", label: "Avg time", align: "right" },
+  { field: "memoryUsage", label: "Memory", align: "right" },
+  { field: "performanceScore", label: "Score", align: "right" },
+];
+
 export default function ComponentMonitor() {
-  const { state } = usePerformanceContext();
+  const { componentMetrics, isDemoMode } = usePerformanceState();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("performanceScore");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [selectedComponent, setSelectedComponent] = useState<string | null>(
-    null
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const components = useMemo(
+    () =>
+      Array.from(componentMetrics.entries())
+        .filter(
+          ([name]) =>
+            !(DASHBOARD_COMPONENTS as readonly string[]).includes(name)
+        )
+        .map(([name, metrics]) => ({ name, ...metrics })),
+    [componentMetrics]
   );
 
-  // Convert componentMetrics Map to array, excluding dashboard components
-  const components = useMemo(() => {
-    return Array.from(state.componentMetrics.entries())
-      .filter(
-        ([name]) => !(DASHBOARD_COMPONENTS as readonly string[]).includes(name)
-      )
-      .map(([name, metrics]) => ({
-        name,
-        ...metrics,
-      }));
-  }, [state.componentMetrics]);
+  const visible = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = term
+      ? components.filter((c) => c.name.toLowerCase().includes(term))
+      : components;
 
-  // Filter components based on search
-  const filteredComponents = useMemo(() => {
-    return components.filter((comp) =>
-      comp.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [components, searchTerm]);
-
-  // Sort components
-  const sortedComponents = useMemo(() => {
-    const sorted = [...filteredComponents].sort((a, b) => {
-      let aValue: number | string = a[sortField] ?? 0;
-      let bValue: number | string = b[sortField] ?? 0;
-
+    return [...filtered].sort((a, b) => {
       if (sortField === "name") {
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
+        const compared = a.name.localeCompare(b.name);
+        return sortDirection === "asc" ? compared : -compared;
       }
-
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
+      const aValue = a[sortField] ?? 0;
+      const bValue = b[sortField] ?? 0;
+      return sortDirection === "asc"
+        ? Number(aValue) - Number(bValue)
+        : Number(bValue) - Number(aValue);
     });
-    return sorted;
-  }, [filteredComponents, sortField, sortDirection]);
+  }, [components, searchTerm, sortField, sortDirection]);
 
-  // Prepare chart data
-  const barChartData = useMemo(() => {
-    return sortedComponents.slice(0, 10).map((comp) => ({
-      name: comp.name,
-      "Avg Render Time": comp.avgRenderTime,
-      "Performance Score": comp.performanceScore,
-    }));
-  }, [sortedComponents]);
+  const totalRenders = components.reduce((sum, c) => sum + c.renderCount, 0);
+  const avgScore = components.length
+    ? components.reduce((sum, c) => sum + c.performanceScore, 0) /
+      components.length
+    : 0;
+  const slowest = components.reduce(
+    (worst, c) => (c.avgRenderTime > (worst?.avgRenderTime ?? -1) ? c : worst),
+    components[0]
+  );
 
-  // Get selected component details
-  const selectedComponentData = useMemo(() => {
-    if (!selectedComponent) return null;
-    const component = components.find((c) => c.name === selectedComponent);
-    if (!component || !component.renderHistory.length) return null;
+  // Worst ten by score — the chart answers "how bad is the tail", which a
+  // table sorted the same way makes you count rows to work out.
+  const chartData = useMemo(
+    () =>
+      [...components]
+        .sort((a, b) => a.performanceScore - b.performanceScore)
+        .slice(0, 10)
+        .map((c) => ({ name: c.name, Score: c.performanceScore })),
+    [components]
+  );
+
+  const history = useMemo(() => {
+    if (!selected) return null;
+    const component = components.find((c) => c.name === selected);
+    if (!component?.renderHistory.length) return null;
 
     return component.renderHistory.map((measurement, index) => ({
-      timestamp: Date.now() - (component.renderHistory.length - index) * 1000,
+      timestamp:
+        measurement.timestamp ||
+        Date.now() - (component.renderHistory.length - index) * 1000,
       renderTime: measurement.duration,
     }));
-  }, [selectedComponent, components]);
+  }, [selected, components]);
 
-  const handleSort = (field: SortField) => {
+  const sort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
-      setSortDirection("desc");
+      // Names read naturally A–Z; every measurement is most useful worst-first.
+      setSortDirection(field === "name" ? "asc" : "desc");
     }
   };
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return "⇅";
-    return sortDirection === "asc" ? "↑" : "↓";
-  };
+  const partial =
+    !isDemoMode &&
+    components.length > 0 &&
+    components.length < BRIZA_UI_COMPONENTS_EXPECTED;
 
   return (
-    <div className={styles.container}>
-      {/* Component Loading Indicator */}
-      {!state.isDemoMode &&
-        components.length > 0 &&
-        components.length < BRIZA_UI_COMPONENTS_EXPECTED && (
-          <ComponentLoadingIndicator
-            expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
-            timeout={5000}
-          />
-        )}
-
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Component Performance Monitor</h1>
-          <p className={styles.subtitle}>
-            Real-time performance tracking for {components.length} components
-          </p>
-        </div>
-        <div className={styles.stats}>
-          <div className={styles.statCard}>
-            <div className={styles.statLabel}>Total Renders</div>
-            <div className={styles.statValue}>
-              {formatNumber(
-                components.reduce((sum, c) => sum + c.renderCount, 0)
-              )}
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statLabel}>Avg Performance</div>
-            <div className={styles.statValue}>
-              {formatNumber(
-                components.reduce((sum, c) => sum + c.performanceScore, 0) /
-                  components.length || 0
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className={styles.controls}>
-        <input
-          type="text"
-          placeholder="Search components..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
+    <div className={styles.page}>
+      {partial && (
+        <ComponentLoadingIndicator
+          expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
+          timeout={5000}
         />
+      )}
+
+      <PageHeader
+        eyebrow="Analyze"
+        title="Component Monitor"
+        description="Every measured component, with render counts, timings and memory as reported by the React Profiler."
+      />
+
+      <div className={styles.readings}>
+        <div className={styles.reading}>
+          <Metric
+            label="Components"
+            value={components.length || "—"}
+            context={
+              searchTerm ? `${visible.length} matching` : "In this session"
+            }
+          />
+        </div>
+        <div className={styles.reading}>
+          <Metric
+            label="Total renders"
+            value={components.length ? formatNumber(totalRenders, 0) : "—"}
+            context={
+              components.length
+                ? `${formatNumber(totalRenders / components.length, 0)} per component`
+                : "No measurements yet"
+            }
+          />
+        </div>
+        <div className={styles.reading}>
+          <Metric
+            label="Average score"
+            value={components.length ? formatNumber(avgScore, 0) : "—"}
+            status={
+              !components.length
+                ? "neutral"
+                : avgScore >= 90
+                ? "good"
+                : avgScore >= 70
+                ? "warn"
+                : "bad"
+            }
+            context="0–100, higher is better"
+          />
+        </div>
+        <div className={styles.reading}>
+          <Metric
+            label="Slowest render"
+            value={slowest ? formatDuration(slowest.avgRenderTime) : "—"}
+            context={slowest ? slowest.name : "No measurements yet"}
+          />
+        </div>
       </div>
 
-      {/* Charts Section */}
-      {sortedComponents.length > 0 && (
-        <div className={styles.chartsGrid}>
-          <div className={styles.chartCard}>
-            <h3 className={styles.chartTitle}>
-              Top 10 Components by Performance
-            </h3>
+      {components.length > 0 && (
+        <div className={styles.charts}>
+          <Panel
+            title="Lowest scores"
+            description="The ten components furthest from a clean run."
+          >
             <PerformanceBarChart
-              data={barChartData}
-              bars={[
-                {
-                  dataKey: "Performance Score",
-                  name: "Score",
-                  color: "#10b981",
-                },
-              ]}
-              height={300}
-              yAxisLabel="Score"
+              data={chartData}
+              bars={[{ dataKey: "Score", name: "Score" }]}
+              height={240}
               colorByValue
-              getBarColor={(value) => getScoreColor(value)}
+              getBarColor={scoreColor}
+              valueFormatter={(value) => formatNumber(Number(value), 0)}
             />
-          </div>
+          </Panel>
 
-          {selectedComponentData && (
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>
-                Render History: {selectedComponent}
-              </h3>
+          <Panel
+            title={selected ? `Render history: ${selected}` : "Render history"}
+            description={
+              selected
+                ? "Every recorded render for this component, oldest first."
+                : "Select a row below to plot its render history."
+            }
+            actions={
+              selected ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon="close"
+                  onClick={() => setSelected(null)}
+                  aria-label="Clear selection"
+                />
+              ) : undefined
+            }
+          >
+            {history ? (
               <PerformanceLineChart
-                data={selectedComponentData}
-                lines={[
-                  {
-                    dataKey: "renderTime",
-                    name: "Render Time (ms)",
-                    color: "#3b82f6",
-                  },
-                ]}
-                height={300}
-                yAxisLabel="Time (ms)"
+                data={history}
+                lines={[{ dataKey: "renderTime", name: "Render time" }]}
+                height={240}
+                valueFormatter={(value) => formatDuration(Number(value))}
               />
-            </div>
-          )}
+            ) : (
+              <div className={styles.chartPlaceholder}>
+                <Icon name="activity" size={18} />
+                <span>
+                  {selected
+                    ? "No render history recorded for this component."
+                    : "No component selected."}
+                </span>
+              </div>
+            )}
+          </Panel>
         </div>
       )}
 
-      {/* Component Table */}
-      <div className={styles.tableCard}>
-        <h3 className={styles.tableTitle}>Component Details</h3>
-
-        {sortedComponents.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyStateIcon}>📊</div>
-            <div className={styles.emptyStateText}>
+      <Panel
+        flush
+        title="All components"
+        actions={
+          <label className={styles.search}>
+            <Icon name="search" size={14} className={styles.searchIcon} />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Filter by name"
+              className={styles.searchInput}
+              aria-label="Filter components by name"
+            />
+          </label>
+        }
+      >
+        {visible.length === 0 ? (
+          <div className={styles.empty}>
+            <Icon name={searchTerm ? "search" : "activity"} size={18} />
+            <div className={styles.emptyTitle}>
               {searchTerm
-                ? "No components match your search"
-                : "No components monitored yet"}
+                ? `Nothing matches “${searchTerm}”`
+                : "No components measured yet"}
             </div>
-            <div className={styles.emptyStateSubtext}>
+            <p className={styles.emptyBody}>
               {searchTerm
-                ? "Try adjusting your search terms"
-                : "Start using components to see performance data"}
-            </div>
+                ? "Check the spelling, or clear the filter to see everything."
+                : "Components report as they mount. Open the showcase to render the library."}
+            </p>
           </div>
         ) : (
-          <div className={styles.tableWrapper}>
+          <div className={styles.tableScroll}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th onClick={() => handleSort("name")}>
-                    Component {getSortIcon("name")}
-                  </th>
-                  <th onClick={() => handleSort("renderCount")}>
-                    Renders {getSortIcon("renderCount")}
-                  </th>
-                  <th onClick={() => handleSort("avgRenderTime")}>
-                    Avg Time {getSortIcon("avgRenderTime")}
-                  </th>
-                  <th onClick={() => handleSort("memoryUsage")}>
-                    Memory {getSortIcon("memoryUsage")}
-                  </th>
-                  <th onClick={() => handleSort("performanceScore")}>
-                    Score {getSortIcon("performanceScore")}
-                  </th>
-                  <th>Actions</th>
+                  {columns.map((column) => {
+                    const active = sortField === column.field;
+                    return (
+                      <th
+                        key={column.field}
+                        className={column.align === "right" ? styles.right : ""}
+                        aria-sort={
+                          active
+                            ? sortDirection === "asc"
+                              ? "ascending"
+                              : "descending"
+                            : "none"
+                        }
+                      >
+                        <button
+                          className={`${styles.sortButton} ${
+                            active ? styles.sortActive : ""
+                          }`}
+                          onClick={() => sort(column.field)}
+                        >
+                          {column.label}
+                          <Icon
+                            name={
+                              active
+                                ? sortDirection === "asc"
+                                  ? "chevronUp"
+                                  : "chevronDown"
+                                : "chevronDown"
+                            }
+                            size={12}
+                            className={
+                              active ? styles.sortIcon : styles.sortIconIdle
+                            }
+                          />
+                        </button>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
-                {sortedComponents.map((component) => (
+                {visible.map((component) => (
                   <tr
                     key={component.name}
                     className={
-                      selectedComponent === component.name
-                        ? styles.selectedRow
-                        : ""
+                      selected === component.name ? styles.rowSelected : ""
+                    }
+                    onClick={() =>
+                      setSelected((current) =>
+                        current === component.name ? null : component.name
+                      )
                     }
                   >
-                    <td className={styles.componentName}>{component.name}</td>
-                    <td>{formatNumber(component.renderCount)}</td>
-                    <td>{formatDuration(component.avgRenderTime)}</td>
-                    <td>{formatBytes(component.memoryUsage || 0)}</td>
-                    <td>
-                      <span
-                        className={styles.scoreBadge}
-                        style={{
-                          backgroundColor: getScoreColor(
-                            component.performanceScore
-                          ),
-                        }}
-                      >
-                        {formatNumber(component.performanceScore)}
-                      </span>
+                    <td className={styles.name}>{component.name}</td>
+                    <td className={`${styles.right} tabular`}>
+                      {formatNumber(component.renderCount, 0)}
                     </td>
-                    <td>
-                      <button
-                        className={styles.viewButton}
-                        onClick={() => setSelectedComponent(component.name)}
-                      >
-                        View Details
-                      </button>
+                    <td className={`${styles.right} ${styles.mono} tabular`}>
+                      {formatDuration(component.avgRenderTime)}
+                    </td>
+                    <td className={`${styles.right} ${styles.mono} tabular`}>
+                      {component.memoryUsage
+                        ? formatBytes(component.memoryUsage)
+                        : "—"}
+                    </td>
+                    <td className={styles.right}>
+                      <span className={styles.score}>
+                        <ScoreBar score={component.performanceScore} />
+                        <span className={`${styles.scoreValue} tabular`}>
+                          {formatNumber(component.performanceScore, 0)}
+                        </span>
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -295,7 +367,7 @@ export default function ComponentMonitor() {
             </table>
           </div>
         )}
-      </div>
+      </Panel>
     </div>
   );
 }

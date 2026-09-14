@@ -1,16 +1,37 @@
 /**
- * Theme Performance Page
+ * Theme Performance
  *
- * Analyzes theme switching performance and CSS delivery methods.
- * Compares CSS-in-JS vs CSS Modules vs Styled Components.
+ * A comparison of styling approaches and what each costs at theme-switch time.
+ * These are reference benchmarks rather than measurements of this app, which
+ * the page states plainly — the rest of the dashboard reports live numbers and
+ * the difference has to be visible.
  */
 
 import { useState } from "react";
 import { PerformanceBarChart } from "../components/charts";
+import {
+  PageHeader,
+  Panel,
+  Metric,
+  Badge,
+  Icon,
+  type Tone,
+  type IconName,
+} from "../components/common";
 import styles from "./ThemePerformance.module.css";
 
-// Mock performance data for different styling approaches
-const stylingApproaches = [
+interface Approach {
+  name: string;
+  firstPaint: number;
+  themeSwitch: number;
+  renderTime: number;
+  bundleSize: number;
+  rating: "excellent" | "good" | "fair";
+  pros: string[];
+  cons: string[];
+}
+
+const stylingApproaches: Approach[] = [
   {
     name: "CSS Modules",
     firstPaint: 125,
@@ -18,11 +39,7 @@ const stylingApproaches = [
     renderTime: 8.2,
     bundleSize: 145,
     rating: "excellent",
-    pros: [
-      "Zero runtime cost",
-      "Great performance",
-      "Type-safe with TypeScript",
-    ],
+    pros: ["Zero runtime cost", "Scoped by default", "Type-safe with TypeScript"],
     cons: ["No dynamic theming", "Build step required"],
   },
   {
@@ -32,8 +49,8 @@ const stylingApproaches = [
     renderTime: 12.5,
     bundleSize: 234,
     rating: "good",
-    pros: ["Dynamic theming", "Scoped styles", "Component co-location"],
-    cons: ["Runtime overhead", "Larger bundle", "Can impact performance"],
+    pros: ["Dynamic theming", "Scoped styles", "Co-located with components"],
+    cons: ["Runtime overhead", "Larger bundle", "Serialisation on every render"],
   },
   {
     name: "Styled Components",
@@ -42,8 +59,8 @@ const stylingApproaches = [
     renderTime: 13.8,
     bundleSize: 256,
     rating: "good",
-    pros: ["Popular ecosystem", "Dynamic styling", "Great DX"],
-    cons: ["Runtime cost", "Bundle size", "SSR complexity"],
+    pros: ["Mature ecosystem", "Dynamic styling", "Strong developer experience"],
+    cons: ["Runtime cost", "Bundle size", "SSR setup is involved"],
   },
   {
     name: "Tailwind CSS",
@@ -52,8 +69,8 @@ const stylingApproaches = [
     renderTime: 9.1,
     bundleSize: 178,
     rating: "excellent",
-    pros: ["Utility-first", "Small bundle (purged)", "Fast development"],
-    cons: ["Learning curve", "Verbose HTML", "Customization can be complex"],
+    pros: ["Utility-first", "Small once purged", "Fast to iterate"],
+    cons: ["Learning curve", "Verbose markup", "Custom design systems take work"],
   },
   {
     name: "Vanilla CSS",
@@ -62,271 +79,283 @@ const stylingApproaches = [
     renderTime: 7.5,
     bundleSize: 120,
     rating: "excellent",
-    pros: ["Maximum performance", "No dependencies", "Universal support"],
-    cons: ["No scoping", "Manual optimization", "Harder to maintain"],
+    pros: ["Fastest available", "No dependencies", "Universal support"],
+    cons: ["No scoping", "Manual optimisation", "Harder to maintain at scale"],
   },
 ];
 
-const bestPractices = [
+const bestPractices: {
+  icon: IconName;
+  title: string;
+  description: string;
+  impact: "High" | "Medium" | "Low";
+}[] = [
   {
-    icon: "⚡",
-    title: "Use CSS Variables for Theming",
+    icon: "bolt",
+    title: "Theme with CSS custom properties",
     description:
-      "CSS custom properties provide near-instant theme switching with zero JavaScript overhead.",
+      "Swapping variable values repaints without re-rendering the tree, so a theme switch costs nothing in JavaScript.",
     impact: "High",
   },
   {
-    icon: "📦",
-    title: "Minimize Runtime CSS Generation",
+    icon: "package",
+    title: "Generate styles at build time",
     description:
-      "Pre-generate styles at build time when possible to reduce runtime performance costs.",
+      "Anything computed during render is paid for on every render. Pre-generate what you can.",
     impact: "High",
   },
   {
-    icon: "🎨",
-    title: "Split Theme Files",
+    icon: "contrast",
+    title: "Ship one theme at a time",
     description:
-      "Load only the active theme to reduce initial CSS payload and improve parsing time.",
+      "Loading only the active theme cuts the initial CSS payload and the time spent parsing it.",
     impact: "Medium",
   },
   {
-    icon: "🚀",
-    title: "Lazy Load Theme Variants",
+    icon: "layers",
+    title: "Load theme variants on demand",
     description:
-      "Load alternative themes on-demand rather than bundling all themes upfront.",
+      "Alternative themes are rarely used in a session — fetch them when chosen rather than bundling all of them.",
     impact: "Medium",
   },
   {
-    icon: "💾",
-    title: "Cache Theme Preference",
+    icon: "checkCircle",
+    title: "Persist the theme choice",
     description:
-      "Store user theme preference in localStorage to prevent flash of unstyled content.",
+      "Reading the stored preference before first paint avoids the flash of the wrong theme on load.",
     impact: "Low",
   },
   {
-    icon: "🔍",
-    title: "Avoid Inline Styles",
+    icon: "search",
+    title: "Avoid inline styles",
     description:
-      "Inline styles prevent browser optimizations and increase HTML payload size.",
+      "Inline styles defeat browser style caching and grow the HTML payload on every element.",
     impact: "Medium",
   },
 ];
 
+const ratingTone: Record<Approach["rating"], Tone> = {
+  excellent: "good",
+  good: "info",
+  fair: "warn",
+};
+
+const impactTone: Record<string, Tone> = {
+  High: "good",
+  Medium: "warn",
+  Low: "info",
+};
+
 export default function ThemePerformance() {
-  const [selectedApproach, setSelectedApproach] =
-    useState<string>("CSS Modules");
+  const [selected, setSelected] = useState<string>("CSS Modules");
 
-  const comparisonData = stylingApproaches.map((approach) => ({
+  // First paint and theme switch share a range (38-172ms); render time sits an
+  // order of magnitude below at 7-14ms. Plotting all three on one linear axis
+  // flattens render time into an invisible stub, so it is reported per approach
+  // in the table below instead of being drawn against a scale it cannot use.
+  const timingData = stylingApproaches.map((approach) => ({
     name: approach.name,
-    "First Paint (ms)": approach.firstPaint,
-    "Theme Switch (ms)": approach.themeSwitch,
-    "Render Time (ms)": approach.renderTime,
+    "First paint": approach.firstPaint,
+    "Theme switch": approach.themeSwitch,
   }));
 
-  const bundleSizeData = stylingApproaches.map((approach) => ({
+  const sizeData = stylingApproaches.map((approach) => ({
     name: approach.name,
-    "Bundle Size (KB)": approach.bundleSize,
+    Size: approach.bundleSize,
   }));
 
-  const getRatingColor = (rating: string) => {
-    switch (rating) {
-      case "excellent":
-        return "var(--color-success)";
-      case "good":
-        return "var(--color-info)";
-      case "fair":
-        return "var(--color-warning)";
-      default:
-        return "var(--text-secondary)";
-    }
-  };
-
-  const getRatingIcon = (rating: string) => {
-    switch (rating) {
-      case "excellent":
-        return "🏆";
-      case "good":
-        return "✓";
-      case "fair":
-        return "→";
-      default:
-        return "✗";
-    }
-  };
+  const current = stylingApproaches[0];
+  const fastest = stylingApproaches.reduce((best, approach) =>
+    approach.themeSwitch < best.themeSwitch ? approach : best
+  );
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Theme Performance Analysis</h1>
-          <p className={styles.subtitle}>
-            Compare styling approaches and optimize theme switching
-          </p>
-        </div>
-        <div className={styles.stats}>
-          <div className={styles.statCard}>
-            <div className={styles.statLabel}>Current Method</div>
-            <div className={styles.statValue} style={{ fontSize: "1.25rem" }}>
-              CSS Modules
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statLabel}>Theme Switch</div>
-            <div
-              className={styles.statValue}
-              style={{ color: "var(--color-success)" }}
-            >
-              45ms
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className={styles.page}>
+      <PageHeader
+        eyebrow="Analyze"
+        title="Theme Performance"
+        description="What each styling approach costs at first paint, at theme-switch time and in shipped bytes."
+        actions={<Badge tone="neutral">Reference benchmarks</Badge>}
+      />
 
-      {/* Performance Comparison Charts */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Performance Comparison</h2>
-        <div className={styles.chartsGrid}>
-          <div className={styles.chartCard}>
-            <h3 className={styles.chartTitle}>Timing Metrics Comparison</h3>
-            <PerformanceBarChart
-              data={comparisonData}
-              bars={[
-                {
-                  dataKey: "First Paint (ms)",
-                  name: "First Paint",
-                  color: "#3b82f6",
-                },
-                {
-                  dataKey: "Theme Switch (ms)",
-                  name: "Theme Switch",
-                  color: "#10b981",
-                },
-                {
-                  dataKey: "Render Time (ms)",
-                  name: "Render Time",
-                  color: "#f59e0b",
-                },
-              ]}
-              height={350}
-              yAxisLabel="Time (ms)"
-            />
-          </div>
-
-          <div className={styles.chartCard}>
-            <h3 className={styles.chartTitle}>Bundle Size Comparison</h3>
-            <PerformanceBarChart
-              data={bundleSizeData}
-              bars={[
-                {
-                  dataKey: "Bundle Size (KB)",
-                  name: "Bundle Size",
-                  color: "#8b5cf6",
-                },
-              ]}
-              height={350}
-              yAxisLabel="Size (KB)"
-            />
-          </div>
+      <div className={styles.readings}>
+        <div className={styles.reading}>
+          <Metric
+            label="This dashboard uses"
+            value={current.name}
+            context="Scoped at build time, no runtime cost"
+          />
+        </div>
+        <div className={styles.reading}>
+          <Metric
+            label="Theme switch"
+            value={current.themeSwitch}
+            unit="ms"
+            status="good"
+            context={
+              current.name === fastest.name
+                ? "Fastest of the approaches compared"
+                : `${fastest.name} is ${current.themeSwitch - fastest.themeSwitch}ms faster`
+            }
+          />
+        </div>
+        <div className={styles.reading}>
+          <Metric
+            label="First paint"
+            value={current.firstPaint}
+            unit="ms"
+            context="Time to first styled frame"
+          />
+        </div>
+        <div className={styles.reading}>
+          <Metric
+            label="CSS payload"
+            value={current.bundleSize}
+            unit="KB"
+            context="Uncompressed stylesheet weight"
+          />
         </div>
       </div>
 
-      {/* Styling Approaches */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Styling Approaches</h2>
-        <div className={styles.approachesGrid}>
-          {stylingApproaches.map((approach) => (
-            <div
-              key={approach.name}
-              className={`${styles.approachCard} ${
-                selectedApproach === approach.name ? styles.selected : ""
-              }`}
-              onClick={() => setSelectedApproach(approach.name)}
-            >
-              <div className={styles.approachHeader}>
-                <h3 className={styles.approachName}>{approach.name}</h3>
-                <span
-                  className={styles.ratingBadge}
-                  style={{ backgroundColor: getRatingColor(approach.rating) }}
-                >
-                  {getRatingIcon(approach.rating)} {approach.rating}
-                </span>
-              </div>
+      <div className={styles.charts}>
+        <Panel
+          title="Timing"
+          description="Lower is better. Render time is reported per approach below."
+        >
+          <PerformanceBarChart
+            data={timingData}
+            bars={[
+              { dataKey: "First paint", name: "First paint" },
+              { dataKey: "Theme switch", name: "Theme switch" },
+            ]}
+            height={260}
+            showLegend
+            valueFormatter={(value) => `${value}ms`}
+          />
+        </Panel>
 
-              <div className={styles.metrics}>
-                <div className={styles.metric}>
-                  <span className={styles.metricLabel}>First Paint</span>
-                  <span className={styles.metricValue}>
-                    {approach.firstPaint}ms
-                  </span>
-                </div>
-                <div className={styles.metric}>
-                  <span className={styles.metricLabel}>Theme Switch</span>
-                  <span className={styles.metricValue}>
-                    {approach.themeSwitch}ms
-                  </span>
-                </div>
-                <div className={styles.metric}>
-                  <span className={styles.metricLabel}>Bundle Size</span>
-                  <span className={styles.metricValue}>
-                    {approach.bundleSize}KB
-                  </span>
-                </div>
-              </div>
-
-              {selectedApproach === approach.name && (
-                <div className={styles.details}>
-                  <div className={styles.detailSection}>
-                    <h4 className={styles.detailTitle}>Pros</h4>
-                    <ul className={styles.detailList}>
-                      {approach.pros.map((pro, index) => (
-                        <li key={index}>✓ {pro}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className={styles.detailSection}>
-                    <h4 className={styles.detailTitle}>Cons</h4>
-                    <ul className={styles.detailList}>
-                      {approach.cons.map((con, index) => (
-                        <li key={index}>✗ {con}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <Panel title="Stylesheet size" description="Uncompressed, in kilobytes.">
+          <PerformanceBarChart
+            data={sizeData}
+            bars={[{ dataKey: "Size", name: "Size" }]}
+            height={260}
+            valueFormatter={(value) => `${value} KB`}
+          />
+        </Panel>
       </div>
 
-      {/* Best Practices */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Best Practices</h2>
-        <div className={styles.practicesGrid}>
-          {bestPractices.map((practice, index) => (
-            <div key={index} className={styles.practiceCard}>
-              <div className={styles.practiceIcon}>{practice.icon}</div>
-              <h3 className={styles.practiceTitle}>{practice.title}</h3>
-              <p className={styles.practiceDescription}>
-                {practice.description}
-              </p>
-              <span
-                className={styles.impactBadge}
-                style={{
-                  backgroundColor:
-                    practice.impact === "High"
-                      ? "var(--color-success)"
-                      : practice.impact === "Medium"
-                      ? "var(--color-warning)"
-                      : "var(--color-info)",
-                }}
+      <Panel
+        flush
+        title="Approaches"
+        description="Select one to read the trade-offs."
+      >
+        <div className={styles.approaches}>
+          {stylingApproaches.map((approach) => {
+            const open = selected === approach.name;
+            return (
+              <div
+                key={approach.name}
+                className={`${styles.approach} ${open ? styles.approachOpen : ""}`}
               >
-                {practice.impact} Impact
+                <button
+                  className={styles.approachHead}
+                  onClick={() => setSelected(open ? "" : approach.name)}
+                  aria-expanded={open}
+                >
+                  <Icon
+                    name="chevronRight"
+                    size={13}
+                    className={styles.approachChevron}
+                  />
+                  <span className={styles.approachName}>{approach.name}</span>
+
+                  <span className={styles.approachStats}>
+                    <span className={`${styles.approachStat} tabular`}>
+                      <span className={styles.approachStatLabel}>Paint</span>
+                      {approach.firstPaint}ms
+                    </span>
+                    <span className={`${styles.approachStat} tabular`}>
+                      <span className={styles.approachStatLabel}>Switch</span>
+                      {approach.themeSwitch}ms
+                    </span>
+                    <span className={`${styles.approachStat} tabular`}>
+                      <span className={styles.approachStatLabel}>Render</span>
+                      {approach.renderTime}ms
+                    </span>
+                    <span className={`${styles.approachStat} tabular`}>
+                      <span className={styles.approachStatLabel}>Size</span>
+                      {approach.bundleSize}KB
+                    </span>
+                  </span>
+
+                  <Badge tone={ratingTone[approach.rating]}>
+                    {approach.rating}
+                  </Badge>
+                </button>
+
+                {open && (
+                  <div className={styles.approachBody}>
+                    <div>
+                      <div className={styles.listLabel}>Strengths</div>
+                      <ul className={styles.list}>
+                        {approach.pros.map((pro) => (
+                          <li key={pro} className={styles.listItem}>
+                            <Icon
+                              name="check"
+                              size={12}
+                              className={styles.listIconGood}
+                            />
+                            {pro}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className={styles.listLabel}>Trade-offs</div>
+                      <ul className={styles.list}>
+                        {approach.cons.map((con) => (
+                          <li key={con} className={styles.listItem}>
+                            <Icon
+                              name="close"
+                              size={12}
+                              className={styles.listIconBad}
+                            />
+                            {con}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </Panel>
+
+      <Panel
+        title="Practices"
+        description="Ordered by what they save rather than by effort."
+      >
+        <div className={styles.practices}>
+          {bestPractices.map((practice) => (
+            <div className={styles.practice} key={practice.title}>
+              <span className={styles.practiceIcon}>
+                <Icon name={practice.icon} size={15} />
               </span>
+              <div className={styles.practiceText}>
+                <div className={styles.practiceHead}>
+                  <h3 className={styles.practiceTitle}>{practice.title}</h3>
+                  <Badge tone={impactTone[practice.impact] ?? "neutral"}>
+                    {practice.impact}
+                  </Badge>
+                </div>
+                <p className={styles.practiceBody}>{practice.description}</p>
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

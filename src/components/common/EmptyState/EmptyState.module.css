@@ -1,122 +1,89 @@
-/* Empty State Styles */
+/* Empty state */
 
 .emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  padding: 3rem 2rem;
-  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-12) var(--sp-6);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
 }
 
 .content {
-  max-width: 500px;
+  max-width: 46ch;
   text-align: center;
 }
 
 .icon {
-  font-size: 4rem;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--sp-4);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 18px;
   line-height: 1;
-  margin-bottom: 1.5rem;
-  opacity: 0.8;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 0.75rem 0;
+  font-size: var(--text-heading);
+  font-weight: 560;
+  letter-spacing: var(--tracking-snug);
+  color: var(--text);
 }
 
 .description {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0 0 2rem 0;
+  margin-top: var(--sp-2);
+  font-size: var(--text-prose);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
 }
 
 .actions {
   display: flex;
-  gap: 1rem;
+  align-items: center;
   justify-content: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
   flex-wrap: wrap;
 }
 
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 30px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-md);
+  font-size: var(--text-body);
+  font-weight: 520;
+  transition: background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+
 .primaryButton {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--bg-primary);
-  background: var(--primary-color);
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid transparent;
 }
 
 .primaryButton:hover {
-  background: var(--primary-color-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--primary-color-alpha);
-}
-
-.primaryButton:active {
-  transform: translateY(0);
-}
-
-.primaryButton:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+  background: var(--accent-hover);
 }
 
 .secondaryButton {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--edge);
 }
 
 .secondaryButton:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary-color);
-}
-
-.secondaryButton:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .emptyState {
-    min-height: 300px;
-    padding: 2rem 1rem;
-  }
-
-  .icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  .title {
-    font-size: 1.25rem;
-  }
-
-  .description {
-    font-size: 0.9375rem;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-
-  .primaryButton,
-  .secondaryButton {
-    width: 100%;
-  }
+  background: var(--surface-2);
+  border-color: var(--text-4);
 }

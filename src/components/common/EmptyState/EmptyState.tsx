@@ -12,7 +12,7 @@
  *   if (totalComponents === 0) {
  *     return (
  *       <EmptyState
- *         icon="📊"
+ *         icon={<Icon name="activity" size={18} />}
  *         title="No Components Monitored"
  *         description="Start monitoring components to see performance metrics"
  *         actionLabel="View Showcase"
@@ -28,7 +28,7 @@ import type { ReactNode } from "react";
 import styles from "./EmptyState.module.css";
 
 interface EmptyStateProps {
-  /** Emoji or icon to display */
+  /** Icon element shown above the title. Omit for a text-only state. */
   icon?: ReactNode;
   /** Main title */
   title: string;
@@ -45,7 +45,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon = "📭",
+  icon,
   title,
   description,
   actionLabel,

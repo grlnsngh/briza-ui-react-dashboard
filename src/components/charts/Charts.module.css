@@ -1,48 +1,107 @@
-/* Charts.module.css */
+/* Chart chrome: container, tooltip, legend, empty state */
 
 .chartContainer {
   width: 100%;
-  padding: var(--spacing-4);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  min-width: 0;
 }
 
-.chartTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-4);
+/* Recharts renders focusable wrappers that show a default outline on click.
+   Keyboard focus is still handled by the global :focus-visible ring. */
+.chartContainer :global(.recharts-wrapper:focus),
+.chartContainer :global(.recharts-surface:focus) {
+  outline: none;
 }
 
-.chartSubtitle {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-3);
+/* ===== Tooltip ====================================================
+   Matches the popover treatment: overlay shadow, strong hairline, tight
+   internal rhythm. The value is the only thing set in full text colour. */
+
+.tooltip {
+  min-width: 140px;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-overlay);
+  pointer-events: none;
 }
 
-.emptyState {
+.tooltipLabel {
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding-bottom: var(--sp-2);
+  margin-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.tooltipRows {
   display: flex;
   flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  white-space: nowrap;
+}
+
+.tooltipSwatch {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+
+.tooltipName {
+  color: var(--text-3);
+  margin-right: var(--sp-4);
+}
+
+.tooltipValue {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ===== Legend ===================================================== */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
-  color: var(--text-secondary);
-  text-align: center;
+  gap: var(--sp-4);
+  padding-top: var(--sp-3);
 }
 
-.emptyStateIcon {
-  font-size: 3rem;
-  margin-bottom: var(--spacing-3);
-  opacity: 0.5;
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--text-2);
 }
 
-.emptyStateText {
-  font-size: 1rem;
-  font-weight: 500;
+.legendSwatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
 }
 
-.emptyStateSubtext {
-  font-size: 0.875rem;
-  margin-top: var(--spacing-2);
+/* ===== Empty ====================================================== */
+
+.chartEmpty {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  font-size: var(--text-meta);
+  color: var(--text-3);
 }

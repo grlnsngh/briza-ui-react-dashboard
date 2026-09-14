@@ -259,7 +259,7 @@ export function AlertPanel({
                 <div className={styles.alertSection}>
                   <h3 className={styles.sectionTitle}>
                     <span className={`${styles.severityBadge} ${styles.error}`}>
-                      🔴 Errors
+                      Errors
                     </span>
                     <span className={styles.sectionCount}>
                       {errorAlerts.length}
@@ -284,7 +284,7 @@ export function AlertPanel({
                     <span
                       className={`${styles.severityBadge} ${styles.warning}`}
                     >
-                      ⚠️ Warnings
+                      Warnings
                     </span>
                     <span className={styles.sectionCount}>
                       {warningAlerts.length}
@@ -307,7 +307,7 @@ export function AlertPanel({
                 <div className={styles.alertSection}>
                   <h3 className={styles.sectionTitle}>
                     <span className={`${styles.severityBadge} ${styles.info}`}>
-                      ℹ️ Info
+                      Info
                     </span>
                     <span className={styles.sectionCount}>
                       {infoAlerts.length}

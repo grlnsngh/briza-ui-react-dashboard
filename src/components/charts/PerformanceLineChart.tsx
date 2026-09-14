@@ -1,8 +1,9 @@
 /**
- * PerformanceLineChart Component
+ * PerformanceLineChart
  *
- * Line chart for displaying performance metrics over time
- * Built with Recharts library
+ * A metric over time. Dots are off by default: at fifty render samples they
+ * merge into a beaded rope and hide the shape of the line, which is the only
+ * reason to draw it. The active dot on hover still marks the read point.
  */
 
 import {
@@ -15,10 +16,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { CHART_COLORS } from "../../utils/constants";
+import { SERIES, axisDefaults, gridDefaults } from "./chartTheme";
+import { ChartTooltip, ChartLegend } from "./ChartFrame";
 import styles from "./Charts.module.css";
-
-const COLORS = Object.values(CHART_COLORS);
 
 interface DataPoint {
   timestamp: number;
@@ -37,75 +37,84 @@ interface PerformanceLineChartProps {
   yAxisLabel?: string;
   showGrid?: boolean;
   showLegend?: boolean;
+  valueFormatter?: (value: number | string) => string;
 }
+
+const formatTimestamp = (timestamp: unknown) =>
+  new Date(Number(timestamp)).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
 export default function PerformanceLineChart({
   data,
   lines,
-  height = 300,
-  xAxisLabel,
+  height = 260,
   yAxisLabel,
   showGrid = true,
-  showLegend = true,
+  showLegend = false,
+  valueFormatter,
 }: PerformanceLineChartProps) {
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  if (!data.length) {
+    return <div className={styles.chartEmpty}>No data to plot</div>;
+  }
+
+  const dense = data.length > 24;
 
   return (
     <div className={styles.chartContainer}>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart
           data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 4, right: 8, left: yAxisLabel ? 4 : -18, bottom: 0 }}
         >
-          {showGrid && (
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-          )}
+          {showGrid && <CartesianGrid {...gridDefaults} />}
+
           <XAxis
             dataKey="timestamp"
             tickFormatter={formatTimestamp}
-            stroke="var(--text-secondary)"
-            label={
-              xAxisLabel
-                ? { value: xAxisLabel, position: "insideBottom", offset: -5 }
-                : undefined
-            }
+            minTickGap={44}
+            {...axisDefaults}
           />
-          <YAxis
-            stroke="var(--text-secondary)"
-            label={
-              yAxisLabel
-                ? { value: yAxisLabel, angle: -90, position: "insideLeft" }
-                : undefined
-            }
-          />
+
+          <YAxis {...axisDefaults} width={40} />
+
           <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--background-secondary)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "var(--radius-md)",
-              color: "var(--text-primary)",
-            }}
-            labelFormatter={formatTimestamp}
+            cursor={{ stroke: "var(--line-strong)", strokeWidth: 1 }}
+            content={
+              <ChartTooltip
+                labelFormatter={formatTimestamp}
+                valueFormatter={valueFormatter}
+              />
+            }
           />
-          {showLegend && <Legend />}
-          {lines.map((line, index) => (
-            <Line
-              key={line.dataKey}
-              type="monotone"
-              dataKey={line.dataKey}
-              name={line.name}
-              stroke={line.color || COLORS[index % COLORS.length]}
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
-            />
-          ))}
+
+          {showLegend && lines.length > 1 && (
+            <Legend content={<ChartLegend />} />
+          )}
+
+          {lines.map((line, index) => {
+            const color = line.color || SERIES[index % SERIES.length];
+            return (
+              <Line
+                key={line.dataKey}
+                type="monotone"
+                dataKey={line.dataKey}
+                name={line.name}
+                stroke={color}
+                strokeWidth={1.75}
+                dot={dense ? false : { r: 2, fill: color, strokeWidth: 0 }}
+                activeDot={{
+                  r: 3.5,
+                  fill: color,
+                  stroke: "var(--surface)",
+                  strokeWidth: 2,
+                }}
+                isAnimationActive={false}
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
     </div>

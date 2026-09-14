@@ -1,13 +1,20 @@
 /**
- * Header Component
+ * Header
  *
- * Top navigation bar with breadcrumbs, theme toggle, and monitoring controls.
- * Responsive design with mobile menu toggle.
+ * A 52px control strip: where you are on the left, what the instrument is
+ * doing on the right. It holds no page content — every page owns its own
+ * title block, so the header stays the same height on every route.
+ *
+ * The theme control is a three-way segmented switch (system / light / dark)
+ * rather than a toggle, because a two-state toggle silently drops the
+ * "follow the OS" option that most users are actually in.
  */
 
 import { useLocation } from "react-router-dom";
+import { useTheme } from "briza-ui-react";
 import { usePerformanceContext } from "../../../contexts";
 import { ROUTES } from "../../../utils/constants";
+import { Icon } from "../Icon";
 import styles from "./Header.module.css";
 
 interface HeaderProps {
@@ -27,6 +34,18 @@ const routeLabels: Record<string, string> = {
   [ROUTES.THEME_PERFORMANCE]: "Theme Performance",
 };
 
+type ThemeMode = "system" | "light" | "dark";
+
+const themeOptions: {
+  mode: ThemeMode;
+  icon: "contrast" | "sun" | "moon";
+  label: string;
+}[] = [
+  { mode: "system", icon: "contrast", label: "Match system" },
+  { mode: "light", icon: "sun", label: "Light" },
+  { mode: "dark", icon: "moon", label: "Dark" },
+];
+
 export default function Header({
   onToggleSidebar,
   sidebarOpen,
@@ -36,123 +55,98 @@ export default function Header({
   const location = useLocation();
   const { state, toggleRealtime } = usePerformanceContext();
 
-  const currentRoute = location.pathname;
-  const pageTitle = routeLabels[currentRoute] || "Dashboard";
+  const pageTitle = routeLabels[location.pathname] ?? "Dashboard";
+  const isLive = state.dashboard.isRealTimeEnabled;
 
-  const handleToggleMonitoring = () => {
-    toggleRealtime(!state.dashboard.isRealTimeEnabled);
-  };
+  // Theme is owned by briza-ui's ThemeProvider, which writes `data-theme` on
+  // the document and persists the choice. Setting that attribute here as well
+  // would race the provider on every mount and lose — which is exactly what the
+  // previous toggle did.
+  const { mode, setMode } = useTheme();
 
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        {/* Mobile Menu Toggle */}
         <button
-          className={styles.menuToggle}
+          className={styles.railToggle}
           onClick={onToggleSidebar}
-          aria-label="Toggle sidebar"
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={sidebarOpen}
         >
-          {sidebarOpen ? "✕" : "☰"}
+          <Icon name="sidebar" size={16} />
         </button>
 
-        {/* Breadcrumb */}
-        <div className={styles.breadcrumb}>
-          <span className={styles.breadcrumbHome}>Home</span>
-          <span className={styles.breadcrumbSeparator}>/</span>
-          <span className={styles.breadcrumbCurrent}>{pageTitle}</span>
-        </div>
+        <nav className={styles.crumbs} aria-label="Breadcrumb">
+          <span className={styles.crumbRoot}>Briza UI</span>
+          <Icon name="chevronRight" size={13} className={styles.crumbSep} />
+          <span className={styles.crumbCurrent} aria-current="page">
+            {pageTitle}
+          </span>
+        </nav>
       </div>
 
       <div className={styles.right}>
-        {/* Real-time Monitoring Toggle */}
-        <div className={styles.monitoringToggle}>
-          <button
-            className={`${styles.toggleButton} ${
-              state.dashboard.isRealTimeEnabled ? styles.active : ""
-            }`}
-            onClick={handleToggleMonitoring}
-            title={
-              state.dashboard.isRealTimeEnabled
-                ? "Disable real-time monitoring"
-                : "Enable real-time monitoring"
-            }
-          >
-            <span className={styles.toggleIcon}>
-              {state.dashboard.isRealTimeEnabled ? "●" : "○"}
-            </span>
-            <span className={styles.toggleLabel}>
-              {state.dashboard.isRealTimeEnabled ? "Monitoring" : "Paused"}
-            </span>
-          </button>
+        {/* Primary control: the one thing that changes what the app is doing. */}
+        <button
+          className={`${styles.monitor} ${isLive ? styles.monitorLive : ""}`}
+          onClick={() => toggleRealtime(!isLive)}
+          title={isLive ? "Pause real-time monitoring" : "Resume real-time monitoring"}
+        >
+          <Icon name={isLive ? "pause" : "play"} size={13} />
+          <span className={styles.monitorLabel}>
+            {isLive ? "Monitoring" : "Paused"}
+          </span>
+        </button>
+
+        <div className={styles.divider} aria-hidden="true" />
+
+        <div className={`${styles.clock} tabular`} title="Last metric update">
+          <Icon name="clock" size={13} className={styles.clockIcon} />
+          {new Date(state.dashboard.lastUpdate).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })}
         </div>
 
-        {/* Alert Bell */}
         {onOpenAlerts && (
           <button
-            className={`${styles.alertBell} ${
-              alertCount === 0 ? styles.noAlerts : ""
-            }`}
+            className={styles.iconButton}
             onClick={onOpenAlerts}
             aria-label={
               alertCount > 0
-                ? `${alertCount} performance alert${
-                    alertCount !== 1 ? "s" : ""
-                  }`
-                : "View performance alerts"
-            }
-            title={
-              alertCount > 0
-                ? `${alertCount} performance alert${
-                    alertCount !== 1 ? "s" : ""
-                  }`
+                ? `${alertCount} performance alert${alertCount === 1 ? "" : "s"}`
                 : "No active alerts"
             }
           >
-            <svg
-              className={styles.bellIcon}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
+            <Icon name="bell" size={16} />
             {alertCount > 0 && (
-              <span className={styles.alertBadge}>
-                {alertCount > 99 ? "99+" : alertCount}
+              <span className={`${styles.badge} tabular`}>
+                {alertCount > 9 ? "9+" : alertCount}
               </span>
             )}
           </button>
         )}
 
-        {/* Theme Toggle (Future) */}
-        <button
-          className={styles.themeToggle}
-          title="Toggle theme"
-          onClick={() => {
-            // Will implement with briza-ui ThemeProvider
-            const root = document.documentElement;
-            const currentTheme = root.getAttribute("data-theme");
-            root.setAttribute(
-              "data-theme",
-              currentTheme === "dark" ? "light" : "dark"
-            );
-          }}
+        <div
+          className={styles.themeSwitch}
+          role="radiogroup"
+          aria-label="Colour theme"
         >
-          🌓
-        </button>
-
-        {/* Last Update Indicator */}
-        <div className={styles.lastUpdate}>
-          <span className={styles.updateLabel}>Last update:</span>
-          <span className={styles.updateTime}>
-            {new Date(state.dashboard.lastUpdate).toLocaleTimeString()}
-          </span>
+          {themeOptions.map((option) => (
+            <button
+              key={option.mode}
+              role="radio"
+              aria-checked={mode === option.mode}
+              className={`${styles.themeOption} ${
+                mode === option.mode ? styles.themeActive : ""
+              }`}
+              onClick={() => setMode(option.mode)}
+              title={option.label}
+            >
+              <Icon name={option.icon} size={14} />
+            </button>
+          ))}
         </div>
       </div>
     </header>
