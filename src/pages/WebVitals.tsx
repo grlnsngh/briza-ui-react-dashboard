@@ -109,16 +109,10 @@ const specs: VitalSpec[] = [
 
 export default function WebVitals() {
   const { dashboard } = usePerformanceState();
-  const { lcp, cls, fcp, ttfb, inp, overallScore } = useCoreWebVitals({
-    enableRealtime: dashboard.isRealTimeEnabled,
-  });
-
-  // Report the switch the user actually controls. `useCoreWebVitals` also
-  // returns an `isMonitoring` flag, but it is seeded once from its prop and
-  // never resyncs, so it disagrees with the header toggle after the first
-  // render — showing it here would tell the user monitoring is paused while
-  // the header says it is running.
-  const isMonitoring = dashboard.isRealTimeEnabled;
+  const { lcp, cls, fcp, ttfb, inp, overallScore, isMonitoring } =
+    useCoreWebVitals({
+      enableRealtime: dashboard.isRealTimeEnabled,
+    });
 
   const [isLoading, setIsLoading] = useState(true);
 
