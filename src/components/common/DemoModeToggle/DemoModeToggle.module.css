@@ -1,155 +1,143 @@
-/* DemoModeToggle.module.css */
+/* Demo data control — inline trigger plus a popover menu */
 
-.container {
-  position: fixed;
-  bottom: var(--spacing-4);
-  right: var(--spacing-4);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-  align-items: flex-end;
+.root {
+  position: relative;
 }
 
-.badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: var(--shadow-lg);
-  animation: pulse 2s infinite;
-  display: flex;
+.trigger {
+  display: inline-flex;
   align-items: center;
-  gap: var(--spacing-2);
-}
-
-.badge.active {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.02);
-  }
-}
-
-.toggleButton {
-  background: var(--background-primary);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-3) var(--spacing-4);
-  font-size: 0.875rem;
+  gap: var(--sp-2);
+  height: 30px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge);
+  color: var(--text-2);
+  font-size: var(--text-body);
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  transition: color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
+}
+
+.trigger:hover {
+  color: var(--text);
+  border-color: var(--text-4);
+}
+
+/* Sample data is a claim about provenance, so it gets the warning tone —
+   not because anything is broken, but because the numbers are not real. */
+.triggerDemo {
+  color: var(--warn);
+  background: var(--warn-quiet);
+  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
+}
+
+.triggerDemo:hover {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 60%, transparent);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: currentColor;
+}
+
+.caret {
+  color: var(--text-4);
+  margin-left: -2px;
+}
+
+/* ===== Menu ======================================================= */
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: var(--z-popover);
+  min-width: 232px;
+  padding: var(--sp-1);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-overlay);
+  animation: riseIn var(--dur-2) var(--ease);
+}
+
+.summary {
+  padding: var(--sp-2) var(--sp-3) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--sp-1);
+}
+
+.summaryRow {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  color: var(--text-primary);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  line-height: 1.7;
 }
 
-.toggleButton:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-primary);
+.summaryRow strong {
+  font-weight: 520;
+  color: var(--text);
 }
 
-.toggleButton.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: transparent;
+.group + .group {
+  margin-top: var(--sp-1);
+  padding-top: var(--sp-1);
+  border-top: 1px solid var(--line);
 }
 
-.toggleButton:active {
-  transform: translateY(0);
-}
-
-.icon {
-  font-size: 1.25rem;
-}
-
-.dropdown {
-  background: var(--background-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: var(--spacing-2);
-  min-width: 200px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.dropdownItem {
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background 0.2s ease;
-  font-size: 0.875rem;
-  color: var(--text-primary);
+.item {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--sp-4);
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--text-body);
+  text-align: left;
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
 }
 
-.dropdownItem:hover {
-  background: var(--background-secondary);
+.item:hover {
+  background: var(--surface-2);
+  color: var(--text);
 }
 
-.dropdownItem.danger {
-  color: var(--color-error);
+.itemLabel {
+  font-weight: 450;
 }
 
-.dropdownItem.danger:hover {
-  background: rgba(239, 68, 68, 0.1);
+.itemHint {
+  flex: none;
+  font-size: var(--text-meta);
+  color: var(--text-4);
 }
 
-.divider {
-  height: 1px;
-  background: var(--border-color);
-  margin: var(--spacing-2) 0;
+.itemDanger {
+  color: var(--bad);
 }
 
-.stats {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  padding: var(--spacing-2) var(--spacing-3);
+.itemDanger:hover {
+  background: var(--bad-quiet);
+  color: var(--bad);
 }
 
-.statsRow {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-1);
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .container {
-    bottom: var(--spacing-3);
-    right: var(--spacing-3);
-  }
-
-  .badge {
-    font-size: 0.625rem;
-    padding: var(--spacing-1) var(--spacing-2);
-  }
-
-  .toggleButton {
-    padding: var(--spacing-2) var(--spacing-3);
-    font-size: 0.75rem;
-  }
-
-  .dropdown {
-    right: 0;
+@media (max-width: 640px) {
+  .menu {
+    right: auto;
+    left: 0;
   }
 }

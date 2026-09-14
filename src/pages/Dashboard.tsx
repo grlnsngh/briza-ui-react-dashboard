@@ -1,12 +1,18 @@
 /**
- * Dashboard Page
+ * Dashboard
  *
- * Main dashboard overview showing key performance metrics and summary cards
+ * The answer to two questions, in order: is the library healthy, and what
+ * should I look at first.
+ *
+ * The four readings across the top are the health answer. The slowest-component
+ * list below is the second, and it is deliberately the largest thing on the
+ * page: a dashboard that shows only aggregates tells you something is wrong
+ * without telling you where.
  */
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { usePerformanceContext } from "../contexts";
+import { usePerformanceState, usePerformanceActions } from "../contexts";
 import { formatNumber } from "../utils";
 import {
   ROUTES,
@@ -15,456 +21,325 @@ import {
 } from "../utils/constants";
 import { generateMockComponentData } from "../utils/mockData";
 import {
-  LoadingSkeleton,
+  Panel,
+  Metric,
+  Badge,
+  ScoreBar,
+  PageHeader,
+  Button,
+  Icon,
   DemoModeToggle,
-  EmptyState,
   ComponentLoadingIndicator,
+  type MetricStatus,
+  type IconName,
 } from "../components/common";
+import styles from "./Dashboard.module.css";
+
+const destinations: {
+  path: string;
+  name: string;
+  icon: IconName;
+  description: string;
+}[] = [
+  {
+    path: ROUTES.COMPONENT_MONITOR,
+    name: "Component Monitor",
+    icon: "activity",
+    description: "Per-component render counts, timings and scores.",
+  },
+  {
+    path: ROUTES.RERENDER_TRACKER,
+    name: "Re-render Tracker",
+    icon: "repeat",
+    description: "Find components rendering more often than their props change.",
+  },
+  {
+    path: ROUTES.BUNDLE_ANALYZER,
+    name: "Bundle Analyzer",
+    icon: "package",
+    description: "Module weight and tree-shaking effectiveness.",
+  },
+  {
+    path: ROUTES.WEB_VITALS,
+    name: "Web Vitals",
+    icon: "bolt",
+    description: "LCP, CLS, INP and TTFB as the browser reports them.",
+  },
+];
+
+/** Shared thresholds, so the bar, the badge and the tint never disagree. */
+function scoreStatus(score: number): MetricStatus {
+  if (score >= 90) return "good";
+  if (score >= 70) return "warn";
+  return "bad";
+}
 
 export default function Dashboard() {
-  const { state, toggleDemoMode, loadMockData } = usePerformanceContext();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [webVitalsLoading, setWebVitalsLoading] = useState(true);
+  const { componentMetrics, webVitals, dashboard, isDemoMode } =
+    usePerformanceState();
+  const { toggleDemoMode, loadMockData } = usePerformanceActions();
   const navigate = useNavigate();
 
-  // Filter to only count Briza UI components (exclude dashboard-specific components)
-  const brizaUIComponents = Array.from(state.componentMetrics.entries()).filter(
-    ([name]) => !(DASHBOARD_COMPONENTS as readonly string[]).includes(name)
+  // The dashboard's own chrome is monitored too, but it is not what this
+  // page is about.
+  const components = useMemo(
+    () =>
+      Array.from(componentMetrics.values()).filter(
+        (metric) =>
+          !(DASHBOARD_COMPONENTS as readonly string[]).includes(
+            metric.componentName
+          )
+      ),
+    [componentMetrics]
   );
-  const totalComponents = brizaUIComponents.length;
 
-  // Calculate average score only from Briza UI components
-  const avgScore =
-    brizaUIComponents.reduce(
-      (sum, [, metric]) => sum + metric.performanceScore,
-      0
-    ) / totalComponents || 0;
+  const tracked = components.length;
+  const avgScore = tracked
+    ? components.reduce((sum, m) => sum + m.performanceScore, 0) / tracked
+    : 0;
+  const totalRenders = components.reduce((sum, m) => sum + m.renderCount, 0);
 
-  // Check if data is loading
-  useEffect(() => {
-    // After 2 seconds, consider initial load complete
-    const timer = setTimeout(() => {
-      setIsInitialLoad(false);
-    }, 2000);
+  const slowest = useMemo(
+    () =>
+      [...components]
+        .sort(
+          (a, b) =>
+            a.performanceScore - b.performanceScore ||
+            b.avgRenderTime - a.avgRenderTime
+        )
+        .slice(0, 8),
+    [components]
+  );
 
-    return () => clearTimeout(timer);
-  }, []);
+  const needsAttention = components.filter(
+    (m) => m.performanceScore < 70
+  ).length;
+  const partial =
+    !isDemoMode && tracked > 0 && tracked < BRIZA_UI_COMPONENTS_EXPECTED;
+  const isLive = dashboard.isRealTimeEnabled;
 
-  // Check if web vitals are still loading
-  useEffect(() => {
-    if (state.webVitals && state.webVitals.overallScore > 0) {
-      setWebVitalsLoading(false);
-    } else if (state.dashboard.isRealTimeEnabled) {
-      // If monitoring is active, keep showing loading
-      setWebVitalsLoading(true);
-      // After 10 seconds, stop showing loading
-      const timer = setTimeout(() => {
-        setWebVitalsLoading(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    } else {
-      setWebVitalsLoading(false);
-    }
-  }, [state.webVitals, state.dashboard.isRealTimeEnabled]);
+  const enableDemo = () => {
+    toggleDemoMode(true);
+    loadMockData(generateMockComponentData());
+  };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      {/* Component Loading Indicator - Shows when components are being discovered */}
-      {!state.isDemoMode &&
-        totalComponents > 0 &&
-        totalComponents < BRIZA_UI_COMPONENTS_EXPECTED && (
-          <ComponentLoadingIndicator
-            expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
-            timeout={5000}
-          />
-        )}
-
-      <header
-        style={{
-          marginBottom: "2rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: "2rem",
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <h1
-            style={{
-              fontSize: "2rem",
-              fontWeight: "700",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Briza UI Performance Dashboard
-          </h1>
-          <p style={{ color: "var(--color-text-secondary)" }}>
-            Real-time performance monitoring and analytics for briza-ui-react
-            component library
-          </p>
-        </div>
-        <DemoModeToggle />
-      </header>
-
-      {/* Empty State - Show when no data */}
-      {totalComponents === 0 && !isInitialLoad && !state.isDemoMode && (
-        <EmptyState
-          icon="📊"
-          title="No Components Monitored Yet"
-          description="Components need to mount first to be tracked. Visit the Component Showcase page to load all 22 Briza UI library components, or enable Demo Mode to see sample data immediately."
-          actionLabel="Load Components →"
-          onAction={() => navigate(ROUTES.SHOWCASE)}
-          secondaryActionLabel="Enable Demo Mode"
-          onSecondaryAction={() => {
-            // Enable demo mode and load mock data
-            toggleDemoMode(true);
-            const mockData = generateMockComponentData();
-            loadMockData(mockData);
-          }}
+    <div className={styles.page}>
+      {partial && (
+        <ComponentLoadingIndicator
+          expectedCount={BRIZA_UI_COMPONENTS_EXPECTED}
+          timeout={5000}
         />
       )}
 
-      {/* Loading State during initial load */}
-      {totalComponents === 0 && isInitialLoad && !state.isDemoMode && (
-        <div style={{ marginBottom: "2rem" }}>
-          <LoadingSkeleton height="200px" />
-        </div>
-      )}
+      <PageHeader
+        eyebrow="Overview"
+        title="Library performance"
+        description="Render, bundle and Web Vitals telemetry for briza-ui-react, measured live in this browser."
+        actions={<DemoModeToggle />}
+      />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "1.5rem",
-          marginBottom: "2rem",
-        }}
-      >
-        {/* Total Components Card */}
-        <div
-          style={{
-            padding: "1.5rem",
-            backgroundColor: "var(--color-surface)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--color-text-secondary)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Total Components
-          </div>
-          <div style={{ fontSize: "2rem", fontWeight: "700" }}>
-            {!state.isDemoMode &&
-            totalComponents > 0 &&
-            totalComponents < BRIZA_UI_COMPONENTS_EXPECTED ? (
-              <>
-                {totalComponents}{" "}
-                <span
-                  style={{
-                    color: "var(--color-text-secondary)",
-                    fontSize: "1.5rem",
-                  }}
-                >
-                  / {BRIZA_UI_COMPONENTS_EXPECTED}
-                </span>
-              </>
-            ) : (
-              totalComponents
-            )}
-          </div>
-          {totalComponents === 0 && (
-            <div
-              style={{
-                marginTop: "0.5rem",
-                fontSize: "0.75rem",
-                color: "var(--color-warning)",
-              }}
-            >
-              <Link
-                to={ROUTES.SHOWCASE}
-                style={{
-                  color: "var(--color-primary)",
-                  textDecoration: "none",
-                }}
-              >
-                Visit Showcase →
-              </Link>{" "}
-              to start monitoring
-            </div>
-          )}
-          {!state.isDemoMode &&
-            totalComponents > 0 &&
-            totalComponents < BRIZA_UI_COMPONENTS_EXPECTED && (
-              <div
-                style={{
-                  marginTop: "0.5rem",
-                  fontSize: "0.75rem",
-                  color: "var(--color-primary)",
-                }}
-              >
-                <Link
-                  to={ROUTES.SHOWCASE}
-                  style={{
-                    color: "var(--color-primary)",
-                    textDecoration: "none",
-                    fontWeight: 500,
-                  }}
-                >
-                  Load all components →
+      <div className={styles.readings}>
+        <div className={styles.reading}>
+          <Metric
+            size="lg"
+            label="Components tracked"
+            value={tracked || "—"}
+            unit={partial ? `/ ${BRIZA_UI_COMPONENTS_EXPECTED}` : undefined}
+            context={
+              tracked === 0 ? (
+                <Link className={styles.readingLink} to={ROUTES.SHOWCASE}>
+                  Mount the library to begin
                 </Link>
-              </div>
-            )}
+              ) : partial ? (
+                <Link className={styles.readingLink} to={ROUTES.SHOWCASE}>
+                  Load the remaining components
+                </Link>
+              ) : (
+                "All expected components mounted"
+              )
+            }
+          />
         </div>
 
-        {/* Avg Performance Score Card */}
-        <div
-          style={{
-            padding: "1.5rem",
-            backgroundColor: "var(--color-surface)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--color-text-secondary)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Avg Performance Score
-          </div>
-          <div style={{ fontSize: "2rem", fontWeight: "700" }}>
-            {totalComponents > 0 ? formatNumber(avgScore, 1) : "-"}
-          </div>
-          {totalComponents === 0 && (
-            <div
-              style={{
-                marginTop: "0.5rem",
-                fontSize: "0.75rem",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              No data yet
-            </div>
-          )}
+        <div className={styles.reading}>
+          <Metric
+            size="lg"
+            label="Average score"
+            value={tracked ? formatNumber(avgScore, 0) : "—"}
+            status={tracked ? scoreStatus(avgScore) : "neutral"}
+            context={
+              tracked
+                ? needsAttention > 0
+                  ? `${needsAttention} below 70`
+                  : "All components above 70"
+                : "No measurements yet"
+            }
+          />
         </div>
 
-        {/* Web Vitals Score Card */}
-        <div
-          style={{
-            padding: "1.5rem",
-            backgroundColor: "var(--color-surface)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--color-text-secondary)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Web Vitals Score
-          </div>
-          <div
-            style={{
-              fontSize: "2rem",
-              fontWeight: "700",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            {state.webVitals && state.webVitals.overallScore > 0 ? (
-              formatNumber(state.webVitals.overallScore, 1)
-            ) : webVitalsLoading && state.dashboard.isRealTimeEnabled ? (
-              <>
-                <LoadingSkeleton width="80px" height="32px" />
-              </>
-            ) : (
-              "-"
-            )}
-          </div>
-          {webVitalsLoading &&
-            state.dashboard.isRealTimeEnabled &&
-            (!state.webVitals || state.webVitals.overallScore === 0) && (
-              <div
-                style={{
-                  marginTop: "0.5rem",
-                  fontSize: "0.75rem",
-                  color: "var(--color-info)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}
-              >
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "12px",
-                    height: "12px",
-                    border: "2px solid var(--color-info)",
-                    borderTopColor: "transparent",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite",
-                  }}
-                />
-                Collecting metrics...
-              </div>
-            )}
-          {!state.dashboard.isRealTimeEnabled &&
-            (!state.webVitals || state.webVitals.overallScore === 0) && (
-              <div
-                style={{
-                  marginTop: "0.5rem",
-                  fontSize: "0.75rem",
-                  color: "var(--color-warning)",
-                }}
-              >
-                Enable monitoring to collect
-              </div>
-            )}
+        <div className={styles.reading}>
+          <Metric
+            size="lg"
+            label="Renders recorded"
+            value={tracked ? formatNumber(totalRenders, 0) : "—"}
+            context={
+              tracked
+                ? `${formatNumber(totalRenders / tracked, 0)} avg per component`
+                : "No measurements yet"
+            }
+          />
         </div>
 
-        {/* Monitoring Status Card */}
-        <div
-          style={{
-            padding: "1.5rem",
-            backgroundColor: "var(--color-surface)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--color-text-secondary)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Monitoring Status
-          </div>
-          <div
-            style={{
-              fontSize: "2rem",
-              fontWeight: "700",
-              color: state.dashboard.isRealTimeEnabled
-                ? "var(--color-success)"
-                : "var(--color-text-secondary)",
-            }}
-          >
-            {state.dashboard.isRealTimeEnabled ? "●" : "○"}{" "}
-            {state.dashboard.isRealTimeEnabled ? "Active" : "Inactive"}
-          </div>
-          <div
-            style={{
-              marginTop: "0.5rem",
-              fontSize: "0.75rem",
-              color: "var(--color-text-secondary)",
-            }}
-          >
-            Click header button to toggle
-          </div>
+        <div className={styles.reading}>
+          <Metric
+            size="lg"
+            label="Web Vitals"
+            value={
+              webVitals && webVitals.overallScore > 0
+                ? formatNumber(webVitals.overallScore, 0)
+                : "—"
+            }
+            status={
+              webVitals && webVitals.overallScore > 0
+                ? scoreStatus(webVitals.overallScore)
+                : "neutral"
+            }
+            context={
+              webVitals && webVitals.overallScore > 0 ? (
+                <Link className={styles.readingLink} to={ROUTES.WEB_VITALS}>
+                  See the breakdown
+                </Link>
+              ) : isLive ? (
+                "Collecting…"
+              ) : (
+                "Resume monitoring to collect"
+              )
+            }
+          />
         </div>
       </div>
 
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
+      <div className={styles.split}>
+        <Panel
+          flush
+          title="Needs attention"
+          description={
+            tracked
+              ? "Lowest performance score first, then slowest average render."
+              : undefined
           }
-        `}
-      </style>
+          actions={
+            tracked > 0 ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                iconAfter="arrowRight"
+                onClick={() => navigate(ROUTES.COMPONENT_MONITOR)}
+              >
+                All components
+              </Button>
+            ) : undefined
+          }
+        >
+          {tracked === 0 ? (
+            <div className={styles.blank}>
+              <div className={styles.blankIcon}>
+                <Icon name="activity" size={18} />
+              </div>
+              <div className={styles.blankTitle}>Nothing measured yet</div>
+              <p className={styles.blankBody}>
+                Components report as they mount. Open the showcase to render all{" "}
+                {BRIZA_UI_COMPONENTS_EXPECTED} library components, or load a
+                sample dataset to see the shape of the data first.
+              </p>
+              <div className={styles.blankActions}>
+                <Button
+                  variant="primary"
+                  iconAfter="arrowRight"
+                  onClick={() => navigate(ROUTES.SHOWCASE)}
+                >
+                  Open showcase
+                </Button>
+                <Button onClick={enableDemo}>Load sample data</Button>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.board}>
+              {slowest.map((metric, index) => (
+                <Link
+                  key={metric.componentName}
+                  to={ROUTES.COMPONENT_MONITOR}
+                  className={styles.row}
+                >
+                  <span className={styles.rank}>
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
 
-      <div
-        style={{
-          padding: "2rem",
-          backgroundColor: "var(--color-surface)",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-md)",
-        }}
-      >
-        <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>
-          Welcome to Briza UI Performance Analytics
-        </h2>
-        <p
-          style={{
-            color: "var(--color-text-secondary)",
-            lineHeight: "1.6",
-            marginBottom: "1rem",
-          }}
+                  <span className={styles.rowIdentity}>
+                    <span className={styles.rowName}>
+                      {metric.componentName}
+                    </span>
+                    <span className={`${styles.rowMeta} tabular`}>
+                      {formatNumber(metric.renderCount, 0)} renders
+                    </span>
+                  </span>
+
+                  <span className={`${styles.rowTime} tabular`}>
+                    {metric.avgRenderTime < 0.01
+                      ? "<0.01"
+                      : formatNumber(metric.avgRenderTime, 2)}
+                    ms
+                  </span>
+
+                  <span className={styles.rowScore}>
+                    <ScoreBar score={metric.performanceScore} />
+                    <span className={`${styles.rowScoreValue} tabular`}>
+                      {formatNumber(metric.performanceScore, 0)}
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Panel>
+
+        <Panel
+          flush
+          title="Where to look next"
+          actions={
+            <Badge tone={isLive ? "good" : "neutral"}>
+              {isLive ? "Live" : "Paused"}
+            </Badge>
+          }
         >
-          This dashboard provides comprehensive performance monitoring and
-          analytics for the briza-ui-react component library. Built with React
-          18+ and modern performance optimization techniques.
-        </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1rem",
-            marginTop: "1.5rem",
-          }}
-        >
-          <div>
-            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-              📊 Component Monitor
-            </h3>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              Track render performance and metrics
-            </p>
+          <div className={styles.routes}>
+            {destinations.map((destination) => (
+              <Link
+                key={destination.path}
+                to={destination.path}
+                className={styles.route}
+              >
+                <span className={styles.routeIcon}>
+                  <Icon name={destination.icon} size={15} />
+                </span>
+                <span className={styles.routeText}>
+                  <span className={styles.routeName}>
+                    {destination.name}
+                    <Icon
+                      name="arrowRight"
+                      size={13}
+                      className={styles.routeArrow}
+                    />
+                  </span>
+                  <span className={styles.routeDescription}>
+                    {destination.description}
+                  </span>
+                </span>
+              </Link>
+            ))}
           </div>
-          <div>
-            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-              📦 Bundle Analyzer
-            </h3>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              Analyze bundle size and tree-shaking
-            </p>
-          </div>
-          <div>
-            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-              ⚡ Web Vitals
-            </h3>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              Monitor Core Web Vitals metrics
-            </p>
-          </div>
-          <div>
-            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-              🔄 Re-render Tracker
-            </h3>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              Identify unnecessary re-renders
-            </p>
-          </div>
-        </div>
+        </Panel>
       </div>
     </div>
   );

@@ -1,338 +1,207 @@
-/* RerenderTracker.module.css */
+/* Re-render Tracker */
 
-.container {
+.page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-6);
+  gap: var(--sp-6);
 }
 
-/* Header */
-.header {
+/* ===== Readings ================================================== */
+
+.readings {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  overflow: hidden;
+}
+
+.reading {
+  padding: var(--sp-4) var(--sp-5);
+  min-width: 0;
+}
+
+.reading + .reading {
+  border-left: 1px solid var(--line);
+}
+
+/* ===== Charts ==================================================== */
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-6);
+  align-items: start;
+}
+
+.chartPlaceholder {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-6);
-  flex-wrap: wrap;
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.subtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-top: var(--spacing-2);
-}
-
-.stats {
-  display: flex;
-  gap: var(--spacing-4);
-}
-
-.statCard {
-  padding: var(--spacing-4);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  min-width: 120px;
-}
-
-.statLabel {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: var(--spacing-2);
-}
-
-.statValue {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* Controls */
-.controls {
-  display: flex;
-  gap: var(--spacing-4);
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 240px;
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  text-align: center;
 }
 
-.checkbox {
-  display: flex;
+/* ===== Filter ==================================================== */
+
+.filter {
+  display: inline-flex;
   align-items: center;
-  gap: var(--spacing-2);
-  font-size: 0.9375rem;
-  color: var(--text-primary);
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--text-2);
   cursor: pointer;
   user-select: none;
 }
 
-.checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.filter input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
-/* Charts */
-.chartsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: var(--spacing-6);
-}
+/* ===== Table ===================================================== */
 
-.chartCard {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-6);
-}
-
-.chartTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-/* Table */
-.tableCard {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-}
-
-.tableTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  padding: var(--spacing-6);
-  padding-bottom: var(--spacing-4);
-  margin: 0;
-}
-
-.tableWrapper {
-  overflow-x: auto;
+.tableScroll {
+  composes: tableScroll from "../styles/table.module.css";
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
+  composes: table from "../styles/table.module.css";
 }
 
-.table thead {
-  background: var(--background-tertiary);
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
+.right {
+  composes: right from "../styles/table.module.css";
 }
 
-.table th {
-  padding: var(--spacing-4);
-  text-align: left;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+.mono {
+  composes: mono from "../styles/table.module.css";
+}
+
+.name {
+  composes: name from "../styles/table.module.css";
+}
+
+.empty {
+  composes: empty from "../styles/table.module.css";
+}
+
+.emptyTitle {
+  composes: emptyTitle from "../styles/table.module.css";
+}
+
+.emptyBody {
+  composes: emptyBody from "../styles/table.module.css";
+}
+
+/* This table has no sort controls, so its headers need their own padding. */
+.table thead th {
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--text-3);
 }
 
 .table tbody tr {
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color var(--transition-fast);
-}
-
-.table tbody tr:hover {
-  background: var(--background-hover);
-}
-
-.table tbody tr.selectedRow {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.table tbody tr.problematicRow {
-  background: rgba(245, 158, 11, 0.05);
-}
-
-.table td {
-  padding: var(--spacing-4);
-  font-size: 0.9375rem;
-  color: var(--text-primary);
-}
-
-.componentName {
-  font-weight: 600;
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.warningBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: var(--color-warning);
-  color: white;
-  border-radius: 50%;
-  font-size: 0.75rem;
-}
-
-.renderCount {
-  font-weight: 600;
-  color: var(--color-info);
-}
-
-.statusBadge {
-  display: inline-block;
-  padding: var(--spacing-1) var(--spacing-3);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.statusBadge.good {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-}
-
-.statusBadge.warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
-}
-
-.viewButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-primary);
-  background: transparent;
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
 }
 
-.viewButton:hover {
-  background: var(--color-primary);
-  color: white;
+.rowSelected {
+  background: var(--accent-quieter);
 }
 
-.viewButton:active {
-  transform: scale(0.98);
+.rowSelected td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
-/* Empty State */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-8);
-  text-align: center;
+.rowSelected:hover {
+  background: var(--accent-quiet);
 }
 
-.emptyStateIcon {
-  font-size: 4rem;
-  opacity: 0.3;
-  margin-bottom: var(--spacing-4);
-}
+/* ===== Tips ======================================================
+   Two columns of short reference text. Not cards — they are read once and
+   then ignored, and four bordered boxes would compete with the data above. */
 
-.emptyStateText {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-2);
-}
-
-.emptyStateSubtext {
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
-}
-
-/* Tips Section */
-.tipsSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
-
-.sectionTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.tipsGrid {
+.tips {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-5) var(--sp-8);
 }
 
-.tipCard {
-  padding: var(--spacing-5);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  transition: all var(--transition-fast);
-}
-
-.tipCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-width: 0;
 }
 
 .tipIcon {
-  font-size: 2rem;
-  margin-bottom: var(--spacing-3);
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-3);
 }
 
 .tipTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--text-body);
+  font-weight: 550;
+  color: var(--text);
 }
 
-.tipDescription {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
+.tipBody {
+  margin-top: 3px;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .chartsGrid {
+/* ===== Responsive ================================================ */
+
+@media (max-width: 1100px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .readings {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reading:nth-child(3) {
+    border-left: none;
+  }
+
+  .reading:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .tips {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .readings {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-  }
-
-  .stats {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .statCard {
-    width: 100%;
-  }
-
-  .tipsGrid {
-    grid-template-columns: 1fr;
+  .reading + .reading {
+    border-left: none;
+    border-top: 1px solid var(--line);
   }
 }

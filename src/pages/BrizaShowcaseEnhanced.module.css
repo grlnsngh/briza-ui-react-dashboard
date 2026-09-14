@@ -1,0 +1,561 @@
+/**
+ * Component Showcase
+ *
+ * This page exists to make components render so the Profiler has something to
+ * measure, which makes it an odd design problem: the demos have to look like
+ * real components without competing with the dashboard chrome around them.
+ *
+ * They are therefore built from the same tokens as everything else and kept
+ * deliberately plain. A showcase full of loud sample widgets would read as a
+ * different product bolted onto this one.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* ===== Header ==================================================== */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-6);
+  padding-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  font-size: var(--text-title);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text);
+}
+
+.subtitle {
+  margin-top: var(--sp-2);
+  max-width: 68ch;
+  font-size: var(--text-prose);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+}
+
+.statBadge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  height: 28px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge);
+}
+
+.statLabel {
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* ===== Stress controls =========================================== */
+
+.stressControls {
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+}
+
+.sectionTitle {
+  font-size: var(--text-heading);
+  font-weight: 560;
+  letter-spacing: var(--tracking-snug);
+  color: var(--text);
+}
+
+.sectionDesc {
+  margin-top: 3px;
+  font-size: var(--text-meta);
+  color: var(--text-3);
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.stressButton {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge);
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 520;
+  transition: background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease);
+}
+
+.stressButton:hover {
+  background: var(--surface-2);
+  border-color: var(--text-4);
+}
+
+/* ===== Component grid ============================================ */
+
+.componentsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: var(--sp-4);
+}
+
+.componentCard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  min-width: 0;
+}
+
+.componentTitle {
+  font-size: var(--text-body);
+  font-weight: 560;
+  color: var(--text);
+}
+
+.componentDesc {
+  margin-top: 2px;
+  font-size: var(--text-label);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+
+/* The demo area is inset so the sample widget reads as a specimen rather
+   than as chrome belonging to the card. */
+.componentDemo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--canvas-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  flex: 1;
+}
+
+/* ===== Demo primitives =========================================== */
+
+.demoButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 var(--sp-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  color: #fff;
+  font-size: var(--text-meta);
+  font-weight: 520;
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.demoButton:hover {
+  background: var(--accent-hover);
+}
+
+.demoButton.secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.demoButton.secondary:hover {
+  background: var(--surface-2);
+}
+
+.demoInput {
+  width: 100%;
+  height: 28px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-meta);
+  outline: none;
+  transition: border-color var(--dur-1) var(--ease);
+}
+
+.demoInput::placeholder {
+  color: var(--text-4);
+}
+
+.demoInput:focus {
+  border-color: var(--accent);
+}
+
+.demoCard {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-meta);
+  font-weight: 550;
+  color: var(--text);
+}
+
+.cardBody {
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ===== Tabs ====================================================== */
+
+.tabs {
+  display: flex;
+  gap: var(--sp-1);
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease);
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.activeTab {
+  color: var(--text);
+  font-weight: 550;
+  border-bottom-color: var(--accent);
+}
+
+.tabContent {
+  padding-top: var(--sp-3);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+}
+
+/* ===== Accordion ================================================= */
+
+.accordionItem {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.accordionHeader:hover {
+  background: var(--surface-2);
+}
+
+.accordionContent {
+  padding: var(--sp-2) var(--sp-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+}
+
+/* ===== Feedback ================================================== */
+
+.alert {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--info-quiet);
+  border: 1px solid color-mix(in srgb, var(--info) 26%, transparent);
+  font-size: var(--text-meta);
+  color: var(--text-2);
+}
+
+.toast {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-inverse);
+  color: var(--canvas);
+  font-size: var(--text-meta);
+  box-shadow: var(--shadow-pop);
+}
+
+.tooltip {
+  display: inline-block;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-sm);
+  background: var(--surface-inverse);
+  color: var(--canvas);
+  font-size: var(--text-label);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-6);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  animation: fadeIn var(--dur-2) var(--ease);
+}
+
+.modal {
+  width: min(400px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-overlay);
+  animation: riseIn var(--dur-2) var(--ease);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-body);
+  font-weight: 560;
+  color: var(--text);
+}
+
+.modalClose {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-sm);
+  color: var(--text-3);
+  font-size: 15px;
+  line-height: 1;
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
+}
+
+.modalClose:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.modalBody {
+  padding: var(--sp-4);
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+/* ===== Progress, skeleton, spinner =============================== */
+
+.progressBar {
+  height: 5px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  transition: width var(--dur-3) var(--ease);
+}
+
+.skeleton {
+  height: 11px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  animation: breathe 1.6s var(--ease) infinite;
+}
+
+.spinner {
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid var(--line-strong);
+  border-top-color: var(--accent);
+  border-radius: var(--r-full);
+  animation: spin 700ms linear infinite;
+}
+
+/* ===== Navigation demos ========================================== */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  flex-wrap: wrap;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+}
+
+.paginationBtn {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: var(--text-label);
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease);
+}
+
+.paginationBtn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.paginationBtn.active {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+.dropdown {
+  width: 100%;
+  height: 28px;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-meta);
+  outline: none;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-full);
+  background: var(--accent-quiet);
+  color: var(--accent-text);
+  font-size: var(--text-label);
+  font-weight: 600;
+}
+
+/* ===== Table demo ================================================ */
+
+.table {
+  width: 100%;
+  font-size: var(--text-meta);
+}
+
+.table th {
+  padding: var(--sp-2);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.table td {
+  padding: var(--sp-2);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== Responsive ================================================ */
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-4);
+  }
+
+  .componentsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -3,6 +3,9 @@
  */
 
 export * from "./Layout";
+export * from "./Icon";
+export * from "./Surface";
+export * from "./Button";
 export * from "./Loading";
 export * from "./LoadingSkeleton";
 export * from "./DemoModeToggle";

@@ -1,24 +1,14 @@
-/* Alert Panel Styles */
+/* Alert drawer
+   The one surface in the app that genuinely floats, so it is the one place a
+   real shadow is warranted. */
 
 .backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  z-index: var(--z-overlay);
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 1300;
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  backdrop-filter: blur(2px);
+  animation: fadeIn var(--dur-2) var(--ease);
 }
 
 .panel {
@@ -26,622 +16,419 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
-  max-width: 500px;
-  background: var(--color-bg-primary);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
-  z-index: 1400;
+  z-index: calc(var(--z-overlay) + 1);
+  width: min(420px, 100vw);
   display: flex;
   flex-direction: column;
-  animation: slideIn 0.3s ease-out;
+  background: var(--surface);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-overlay);
+  animation: slideIn var(--dur-3) var(--ease);
 }
 
 @keyframes slideIn {
   from {
-    transform: translateX(100%);
+    transform: translateX(12px);
+    opacity: 0;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
   }
 }
 
-/* Header */
+/* ===== Header ===================================================== */
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
-  flex-shrink: 0;
-  gap: 1rem;
+  gap: var(--sp-3);
+  flex: none;
+  height: var(--header-h);
+  padding: 0 var(--sp-4);
+  border-bottom: 1px solid var(--line);
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex: 1;
+  gap: var(--sp-2);
   min-width: 0;
 }
 
 .title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0;
-  white-space: nowrap;
+  font-size: var(--text-heading);
+  font-weight: 560;
+  letter-spacing: var(--tracking-snug);
+  color: var(--text);
 }
 
 .badges {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--sp-1);
 }
 
 .activeBadge,
 .dismissedBadge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 1.75rem;
-  height: 1.75rem;
-  padding: 0 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: var(--radius-full);
-  transition: all 0.2s ease;
+  height: 18px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-sm);
+  font-size: var(--text-label);
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
 }
 
 .activeBadge {
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.15),
-    rgba(139, 92, 246, 0.15)
-  );
-  color: var(--color-primary);
-  border: 1.5px solid rgba(99, 102, 241, 0.3);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  background: var(--bad-quiet);
+  color: var(--bad);
 }
 
 .dismissedBadge {
-  background: linear-gradient(
-    135deg,
-    rgba(100, 116, 139, 0.1),
-    rgba(71, 85, 105, 0.1)
-  );
-  color: var(--color-text-secondary);
-  border: 1.5px solid rgba(100, 116, 139, 0.2);
+  background: var(--surface-2);
+  color: var(--text-3);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.actionButton {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  height: 2rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.actionButton svg {
-  flex-shrink: 0;
-}
-
-.actionLabel {
-  line-height: 1;
-}
-
-.actionButton:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-}
-
-.actionButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.1);
-}
-
-.actionButton.clearButton {
-  color: var(--color-warning);
-  border-color: rgba(245, 158, 11, 0.3);
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.08),
-    rgba(251, 191, 36, 0.05)
-  );
-}
-
-.actionButton.clearButton:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.15),
-    rgba(251, 191, 36, 0.1)
-  );
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  gap: var(--sp-1);
+  flex: none;
 }
 
 .closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  margin-left: 0.5rem;
-  padding-left: 0.5rem;
-  border-left: 1px solid var(--color-border);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-md);
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
 }
 
 .closeButton:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
+  color: var(--text);
+  background: var(--surface-2);
 }
 
-.closeButton:active {
-  transform: scale(0.95);
+.closeButton svg {
+  width: 15px;
+  height: 15px;
 }
 
-.closeButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
+/* ===== Filter bar ================================================= */
 
-/* Filter Bar */
 .filterBar {
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(
-    180deg,
-    var(--color-bg-secondary),
-    var(--color-surface)
-  );
-  border-bottom: 1px solid var(--color-border);
-}
-
-.filterButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  gap: var(--sp-1);
+  flex: none;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--line);
 }
 
-.filterButton:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+.filterButton,
+.clearButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 26px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-sm);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
+}
+
+.filterButton:hover,
+.clearButton:hover {
+  color: var(--text);
+  background: var(--surface-2);
 }
 
 .filterButton.active {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary),
-    rgba(139, 92, 246, 0.9)
-  );
-  color: white;
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+  color: var(--text);
+  background: var(--surface-2);
+  font-weight: 500;
 }
 
-.filterButton.active:hover {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-dark),
-    var(--color-primary)
-  );
-  transform: translateY(-1px);
+.clearButton {
+  margin-left: auto;
+  color: var(--text-3);
 }
 
-.filterButton svg {
-  flex-shrink: 0;
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 26px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-sm);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
 }
 
-/* Content */
+.actionButton:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.actionButton svg {
+  width: 13px;
+  height: 13px;
+}
+
+.actionLabel {
+  white-space: nowrap;
+}
+
+/* ===== Content ==================================================== */
+
 .content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: var(--sp-3);
 }
 
-/* Empty State */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes successPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-.emptyIcon {
-  width: 5rem;
-  height: 5rem;
-  color: var(--color-success);
-  margin-bottom: 1.5rem;
-  animation: successPulse 2s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3));
-}
-
-.emptyTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 0.75rem 0;
-  background: linear-gradient(
-    135deg,
-    var(--color-success),
-    var(--color-primary)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.emptyMessage {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-  margin: 0;
-  max-width: 400px;
-}
-
-/* Alert Sections */
-.alertSection {
-  margin-bottom: 2rem;
-}
-
-.alertSection:last-child {
-  margin-bottom: 0;
+.alertSection + .alertSection {
+  margin-top: var(--sp-5);
 }
 
 .sectionTitle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: 0 0 1rem 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+  padding: 0 var(--sp-1);
 }
 
+/* Severity is carried by a labelled chip, so the grouping survives greyscale
+   and does not depend on telling red from amber. */
 .severityBadge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 600;
+  gap: var(--sp-2);
+  height: 19px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-sm);
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-normal);
+}
+
+.severityBadge::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: var(--r-full);
+  background: currentColor;
 }
 
 .severityBadge.error {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
+  background: var(--bad-quiet);
+  color: var(--bad);
 }
 
 .severityBadge.warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  background: var(--warn-quiet);
+  color: var(--warn);
 }
 
 .severityBadge.info {
-  background: rgba(6, 182, 212, 0.1);
-  color: var(--color-info);
+  background: var(--info-quiet);
+  color: var(--info);
 }
 
 .sectionCount {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-full);
+  font-size: var(--text-meta);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Alert List */
 .alertList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--sp-2);
 }
 
-/* Alert Card */
+/* ===== Alert card ================================================= */
+
 .alertCard {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  border-left: 4px solid;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
+  padding: var(--sp-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  transition: border-color var(--dur-1) var(--ease),
+    opacity var(--dur-2) var(--ease);
 }
 
 .alertCard:hover {
-  box-shadow: var(--shadow-md);
+  border-color: var(--line-strong);
 }
 
-.alertCard.error {
-  border-left-color: var(--color-error);
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.05) 0%,
-    var(--color-surface) 100%
-  );
-}
-
-.alertCard.warning {
-  border-left-color: var(--color-warning);
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.05) 0%,
-    var(--color-surface) 100%
-  );
-}
-
-.alertCard.info {
-  border-left-color: var(--color-info);
-  background: linear-gradient(
-    135deg,
-    rgba(6, 182, 212, 0.05) 0%,
-    var(--color-surface) 100%
-  );
-}
-
-/* Dismissed alert styling */
 .alertCard.dismissed {
-  opacity: 0.6;
-  border-left-color: var(--color-text-tertiary);
-  background: var(--color-bg-secondary);
-}
-
-.alertCard.dismissed:hover {
-  opacity: 0.8;
-}
-
-.alertCardContent {
-  flex: 1;
-  min-width: 0;
+  opacity: 0.5;
 }
 
 .alertCardHeader {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.alertCardContent {
+  min-width: 0;
+  flex: 1;
 }
 
 .alertTitle {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0;
-  line-height: 1.3;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.dismissedLabel {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-  font-style: italic;
+  font-size: var(--text-body);
+  font-weight: 550;
+  color: var(--text);
+  line-height: var(--leading-snug);
 }
 
 .componentName {
-  padding: 0.125rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--accent-text);
 }
 
 .alertMessage {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin: 0 0 0.5rem 0;
-  word-wrap: break-word;
+  margin-top: var(--sp-2);
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
 }
+
+.dismissButton {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-sm);
+  color: var(--text-4);
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
+}
+
+.dismissButton:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.dismissButton svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ===== Metrics ====================================================
+   Measured against threshold. Both are shown because "142ms" alone does not
+   say whether it is slightly over or five times over. */
 
 .alertMetrics {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  font-size: 0.8125rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
 }
 
 .metricLabel {
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-4);
 }
 
 .metricValue {
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text);
 }
 
 .metricThreshold {
-  color: var(--color-text-tertiary);
-  font-size: 0.75rem;
+  color: var(--text-3);
 }
 
 .alertFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
 }
 
 .timestamp {
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
+  font-size: var(--text-label);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
 }
 
-.dismissButton {
+.dismissedLabel {
+  font-size: var(--text-label);
+  color: var(--text-4);
+}
+
+/* ===== Empty ====================================================== */
+
+.emptyState {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+  gap: var(--sp-2);
+  min-height: 260px;
+  padding: var(--sp-8) var(--sp-5);
+  text-align: center;
 }
 
-.dismissButton:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
+.emptyIcon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: var(--sp-1);
+  color: var(--good);
+  stroke-width: 1.5;
 }
 
-.dismissButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.emptyTitle {
+  font-size: var(--text-body);
+  font-weight: 550;
+  color: var(--text);
 }
 
-/* Dark Mode */
-[data-theme="dark"] .panel {
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+.emptyMessage {
+  max-width: 34ch;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
 }
 
-[data-theme="dark"] .alertCard.error {
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.1) 0%,
-    var(--color-surface) 100%
-  );
-}
+/* ===== Responsive ================================================= */
 
-[data-theme="dark"] .alertCard.warning {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.1) 0%,
-    var(--color-surface) 100%
-  );
-}
-
-[data-theme="dark"] .alertCard.info {
-  background: linear-gradient(
-    135deg,
-    rgba(56, 189, 248, 0.1) 0%,
-    var(--color-surface) 100%
-  );
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
+@media (max-width: 520px) {
   .panel {
-    max-width: 100%;
-  }
-
-  .header {
-    padding: 1rem;
-    gap: 0.5rem;
-  }
-
-  .title {
-    font-size: 1rem;
-  }
-
-  .badges {
-    gap: 0.375rem;
-  }
-
-  .activeBadge,
-  .dismissedBadge {
-    min-width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.6875rem;
+    width: 100vw;
+    border-left: none;
   }
 
   .actionLabel {
     display: none;
-  }
-
-  .actionButton {
-    padding: 0.5rem;
-    gap: 0;
-  }
-
-  .headerActions {
-    gap: 0.375rem;
-  }
-
-  .content {
-    padding: 1rem;
-  }
-
-  .alertCard {
-    padding: 0.875rem;
   }
 }

@@ -1,292 +1,341 @@
-/* Sidebar.module.css */
+/* Sidebar — fixed rail, collapses to icons */
 
 .sidebar {
   position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
-  width: 280px;
-  background: linear-gradient(
-    180deg,
-    var(--background-secondary) 0%,
-    var(--background-primary) 100%
-  );
-  border-right: 1px solid var(--border-color);
+  inset: 0 auto 0 0;
+  z-index: var(--z-sidebar);
+  width: var(--sidebar-w);
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-normal);
-  z-index: var(--z-sidebar);
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg);
+  background: var(--canvas-inset);
+  border-right: 1px solid var(--line);
+  transition: width var(--dur-3) var(--ease);
+  overflow: hidden;
 }
 
-.sidebar.closed {
-  transform: translateX(-100%);
+.collapsed {
+  width: var(--sidebar-w-collapsed);
 }
 
-/* Brand Section */
+/* ===== Brand ====================================================== */
+
 .brand {
-  padding: var(--spacing-6) var(--spacing-4);
-  border-bottom: 1px solid var(--border-color);
-  background: var(--background-primary);
-}
-
-.logo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
+  gap: var(--sp-2);
+  height: var(--header-h);
+  padding: 0 var(--sp-3);
+  flex: none;
+  border-bottom: 1px solid var(--line);
 }
 
-.logoIcon {
-  font-size: 1.5rem;
+.mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: var(--edge);
 }
 
-.logoText {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-primary);
+.mark svg {
+  width: 16px;
+  height: 16px;
 }
 
-.brandLogo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-primary);
+.wordmark {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  margin-bottom: var(--spacing-1);
+  align-items: baseline;
+  gap: 0.28em;
+  font-size: var(--text-body);
+  letter-spacing: var(--tracking-snug);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity var(--dur-2) var(--ease);
 }
 
-.brandSubtitle {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-left: var(--spacing-1);
+.wordmarkName {
+  font-weight: 600;
+  color: var(--text);
 }
 
-/* Navigation */
+.wordmarkSuffix {
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+/* ===== Readings ===================================================
+   Three live values under the brand. Deliberately not a card: cards imply
+   something you act on, and these are just gauges. */
+
+.readings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+
+.reading {
+  padding: var(--sp-3) var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.reading + .reading {
+  border-left: 1px solid var(--line);
+}
+
+.readingLabel {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.readingValue {
+  font-size: var(--text-prose);
+  font-weight: 550;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+/* ===== Navigation ================================================= */
+
 .nav {
   flex: 1;
-  padding: var(--spacing-4) 0;
+  min-height: 0;
   overflow-y: auto;
-}
-
-.navLink {
+  padding: var(--sp-3) var(--sp-2) var(--sp-4);
   display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4);
-  margin: var(--spacing-1) var(--spacing-2);
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-  font-weight: 500;
-  font-size: 0.9375rem;
+  flex-direction: column;
+  gap: var(--sp-5);
 }
 
-.navLink:hover {
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  transform: translateX(4px);
-}
-
-.navLink.active {
-  background: linear-gradient(90deg, var(--color-primary-light), transparent);
-  color: var(--color-primary);
-  border-left: 3px solid var(--color-primary);
-  font-weight: 600;
-}
-
-.navIcon {
-  width: 20px;
-  text-align: center;
-  font-size: 1.125rem;
-  flex-shrink: 0;
-}
-
-.navLabel {
-  flex: 1;
-}
-
-/* Legacy support */
-.navItem {
+.group {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4);
-  margin: var(--spacing-1) var(--spacing-2);
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-  font-weight: 500;
-  font-size: 0.9375rem;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.navItem:hover {
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  transform: translateX(4px);
-}
-
-.navItem.active {
-  background: linear-gradient(90deg, var(--color-primary-light), transparent);
-  color: var(--color-primary);
-  border-left: 3px solid var(--color-primary);
-  font-weight: 600;
-}
-
-/* Quick Stats */
-.quickStats {
-  padding: var(--spacing-4);
-  margin: var(--spacing-2);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-}
-
-.quickStatsTitle {
-  font-size: 0.8125rem;
-  font-weight: 600;
+.groupHeading {
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-3);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
+  color: var(--text-4);
+  padding: 0 var(--sp-2) var(--sp-2);
+  white-space: nowrap;
 }
 
-.statItem {
+.link {
+  position: relative;
   display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: 32px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-md);
+  color: var(--text-2);
+  font-size: var(--text-body);
+  font-weight: 450;
+  white-space: nowrap;
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
+}
+
+.link:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+/* Active state is carried by weight, colour and a 2px marker rather than a
+   filled pill — a filled block at this size fights the icon inside it. */
+.active {
+  color: var(--text);
+  font-weight: 550;
+  background: var(--surface-2);
+}
+
+.active::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--sp-2) * -1 - 1px);
+  top: 50%;
+  translate: 0 -50%;
+  width: 2px;
+  height: 16px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+}
+
+.linkIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease);
+}
+
+.link:hover .linkIcon {
+  color: var(--text-2);
+}
+
+.active .linkIcon {
+  color: var(--accent);
+}
+
+.linkLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Foot ======================================================= */
+
+.foot {
+  flex: none;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-2) 0;
+  gap: var(--sp-2);
+  height: 38px;
+  padding: 0 var(--sp-3);
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
 }
 
-.statItem:not(:last-child) {
-  border-bottom: 1px solid var(--border-color);
-}
-
-.statLabel {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.statValue {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.statValue.score {
-  color: var(--color-success);
-}
-
-.statusIndicator {
+.state {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-1);
-  font-size: 0.8125rem;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  min-width: 0;
 }
 
-.statusIndicator::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-success);
-  animation: pulse 2s ease-in-out infinite;
+.stateDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--text-4);
 }
 
-.statusIndicator.inactive::before {
-  background: var(--color-error);
-  animation: none;
+.stateLive .stateDot {
+  background: var(--good);
+  animation: breathe 2.4s var(--ease) infinite;
 }
 
-.statusIndicator.active {
-  color: var(--color-success);
+.stateLive {
+  color: var(--text-2);
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* Footer */
-.footer {
-  padding: var(--spacing-4);
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  margin-top: auto;
-}
-
-.footerText {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-}
-
-.footerText div:first-child {
-  font-weight: 600;
-  margin-bottom: var(--spacing-1);
+.stateLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .version {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-4);
 }
 
-/* Mobile Overlay */
-.overlay {
+/* ===== Collapsed ==================================================
+   Labels are removed from the flow, not just hidden, so the rail keeps a
+   true 56px width and icons stay optically centred. */
+
+.collapsed .wordmark,
+.collapsed .readings,
+.collapsed .groupHeading,
+.collapsed .linkLabel,
+.collapsed .stateLabel,
+.collapsed .version {
+  opacity: 0;
+  width: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.collapsed .brand,
+.collapsed .nav,
+.collapsed .foot {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.collapsed .brand,
+.collapsed .foot {
+  justify-content: center;
+}
+
+.collapsed .link {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  margin: 0 auto;
+  width: 32px;
+}
+
+.collapsed .group {
+  align-items: center;
+}
+
+.collapsed .active::before {
+  left: 0;
+}
+
+.scrim {
   display: none;
 }
 
+/* ===== Responsive =================================================
+   Below 1024px the sidebar is an overlay drawer, so `isOpen` flips meaning
+   from "expanded" to "visible". */
+
 @media (max-width: 1024px) {
   .sidebar {
-    transform: translateX(-100%);
+    width: var(--sidebar-w);
+    translate: 0 0;
+    transition: translate var(--dur-3) var(--ease);
+    box-shadow: var(--shadow-overlay);
   }
 
-  .sidebar.open {
-    transform: translateX(0);
+  .collapsed {
+    translate: -100% 0;
+    box-shadow: none;
   }
 
-  .overlay {
+  .collapsed .wordmark,
+  .collapsed .readings,
+  .collapsed .groupHeading,
+  .collapsed .linkLabel,
+  .collapsed .stateLabel,
+  .collapsed .version {
+    opacity: 1;
+    width: auto;
+    overflow: visible;
+  }
+
+  .scrim {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
     z-index: calc(var(--z-sidebar) - 1);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition-normal);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+    animation: fadeIn var(--dur-2) var(--ease);
   }
-
-  .overlay.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-/* Scrollbar Styling */
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
 }

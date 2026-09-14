@@ -1,49 +1,41 @@
-/* Layout.module.css */
+/* Layout — fixed rail plus a scrolling content column */
 
 .layout {
-  display: flex;
   min-height: 100vh;
-  background-color: var(--background-primary);
-  color: var(--text-primary);
+  background: var(--canvas);
+  color: var(--text);
 }
 
-.mainContainer {
-  flex: 1;
+.main {
   display: flex;
   flex-direction: column;
-  margin-left: 280px;
-  transition: margin-left var(--transition-normal);
-  min-width: 0; /* Prevents flex overflow issues */
+  min-height: 100vh;
+  min-width: 0;
+  margin-left: var(--sidebar-w);
+  transition: margin-left var(--dur-3) var(--ease);
 }
 
-.mainContainer.sidebarClosed {
-  margin-left: 0;
+.railCollapsed {
+  margin-left: var(--sidebar-w-collapsed);
 }
 
 .content {
   flex: 1;
-  padding: var(--spacing-6);
-  overflow-y: auto;
-  max-width: 1600px;
   width: 100%;
+  max-width: var(--content-max);
   margin: 0 auto;
+  padding: var(--sp-6) var(--sp-6) var(--sp-12);
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
-  .mainContainer {
+  .main,
+  .railCollapsed {
     margin-left: 0;
   }
 }
 
 @media (max-width: 768px) {
   .content {
-    padding: var(--spacing-4);
-  }
-}
-
-@media (max-width: 480px) {
-  .content {
-    padding: var(--spacing-3);
+    padding: var(--sp-4) var(--sp-4) var(--sp-10);
   }
 }

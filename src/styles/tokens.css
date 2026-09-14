@@ -1,0 +1,247 @@
+/**
+ * Design Tokens
+ *
+ * A single source of truth for colour, type, space and depth.
+ *
+ * Rules this system holds itself to:
+ *
+ * 1. Chrome is achromatic. Navigation, panels, borders and labels carry no hue.
+ *    Colour is a signal, not decoration — if something is coloured, it means
+ *    something about the data.
+ * 2. One accent. Violet marks interaction and selection only. The status ramp
+ *    (good / warn / bad) is reserved for measurements, so the accent never
+ *    competes with a reading.
+ * 3. Hairlines, not shadows. Depth comes from a 1px border and a light top
+ *    edge. Drop shadows are for things that genuinely float.
+ * 4. Numbers are tabular. Every metric uses lining tabular figures so columns
+ *    align and a changing value does not reflow its neighbours.
+ */
+
+:root {
+  /* ===== Neutral ramp — light ===================================== */
+  --canvas: #fbfbfc;
+  --canvas-inset: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f6f7f9;
+  --surface-3: #eceef1;
+  --surface-inverse: #15171a;
+
+  --line: rgba(9, 11, 15, 0.09);
+  --line-strong: rgba(9, 11, 15, 0.16);
+  --line-accent: rgba(88, 80, 230, 0.4);
+
+  --text: #15171a;
+  --text-2: #5c626b;
+  --text-3: #868d97;
+  --text-4: #b0b6be;
+  --text-inverse: #ffffff;
+
+  /* Light edge that reads as a lit top bevel. Nearly invisible, load-bearing. */
+  --edge: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* ===== Accent — interaction and selection only =================== */
+  --accent: #5850e6;
+  --accent-hover: #4740d4;
+  --accent-quiet: rgba(88, 80, 230, 0.09);
+  --accent-quieter: rgba(88, 80, 230, 0.05);
+  --accent-text: #4740d4;
+
+  /* ===== Status ramp — reserved for measurements =================== */
+  --good: #1a7f37;
+  --good-quiet: rgba(26, 127, 55, 0.1);
+  --warn: #9a6700;
+  --warn-quiet: rgba(154, 103, 0, 0.1);
+  --bad: #cf222e;
+  --bad-quiet: rgba(207, 34, 46, 0.09);
+  --info: #0e7490;
+  --info-quiet: rgba(14, 116, 144, 0.09);
+
+  /* Categorical series for charts. Distinct in hue *and* lightness, so they
+     survive greyscale printing and the common forms of colour blindness. */
+  --series-1: #5850e6;
+  --series-2: #0e7490;
+  --series-3: #9a6700;
+  --series-4: #1a7f37;
+  --series-5: #a13670;
+  --series-6: #4b5563;
+
+  --grid-line: rgba(9, 11, 15, 0.06);
+
+  /* ===== Type ===================================================== */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* A compact scale. This is an instrument, so more data per screen beats
+     bigger type — but never below 11px, and never below 500 weight at 11px. */
+  --text-display: 1.75rem; /* 28 — the one number on a page that matters most */
+  --text-title: 1.25rem; /* 20 — page title */
+  --text-heading: 0.9375rem; /* 15 — panel heading */
+  --text-body: 0.8125rem; /* 13 — default UI text */
+  --text-prose: 0.875rem; /* 14 — running sentences */
+  --text-meta: 0.75rem; /* 12 — secondary detail */
+  --text-label: 0.6875rem; /* 11 — uppercase field labels */
+
+  --metric-lg: 2rem;
+  --metric-md: 1.375rem;
+  --metric-sm: 1rem;
+
+  --tracking-tight: -0.021em; /* display sizes only */
+  --tracking-snug: -0.011em;
+  --tracking-normal: 0;
+  --tracking-label: 0.06em; /* uppercase labels need the air */
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+
+  /* ===== Space — 4px grid ========================================= */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-7: 1.75rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+
+  /* ===== Radius — tight. Soft corners read as consumer, not tool. == */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 12px;
+  --r-full: 999px;
+
+  /* ===== Depth — only for things that actually float =============== */
+  --shadow-pop: 0 1px 1px rgba(9, 11, 15, 0.04),
+    0 8px 24px -8px rgba(9, 11, 15, 0.14);
+  --shadow-overlay: 0 1px 1px rgba(9, 11, 15, 0.05),
+    0 16px 48px -12px rgba(9, 11, 15, 0.22);
+
+  /* ===== Motion — quick and unfussy =============================== */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-1: 90ms;
+  --dur-2: 150ms;
+  --dur-3: 240ms;
+
+  /* ===== Layout =================================================== */
+  --sidebar-w: 15rem;
+  --sidebar-w-collapsed: 3.5rem;
+  --header-h: 3.25rem;
+  --content-max: 1600px;
+
+  --z-sticky: 100;
+  --z-sidebar: 200;
+  --z-header: 300;
+  --z-overlay: 400;
+  --z-popover: 500;
+  --z-toast: 600;
+}
+
+/* ===== Neutral ramp — dark ======================================== */
+/* Applied for an explicit dark choice, and for system preference unless the
+   user has explicitly chosen light. */
+[data-theme="dark"] {
+  --canvas: #0a0b0d;
+  --canvas-inset: #08090b;
+  --surface: #101216;
+  --surface-2: #16191e;
+  --surface-3: #1d2026;
+  --surface-inverse: #edeef1;
+
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.13);
+  --line-accent: rgba(140, 133, 255, 0.45);
+
+  --text: #edeef1;
+  --text-2: #9ba1ab;
+  --text-3: #6e7480;
+  --text-4: #4b5058;
+  --text-inverse: #0a0b0d;
+
+  --edge: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  --accent: #8c85ff;
+  --accent-hover: #a49eff;
+  --accent-quiet: rgba(140, 133, 255, 0.13);
+  --accent-quieter: rgba(140, 133, 255, 0.07);
+  --accent-text: #a49eff;
+
+  --good: #3fb950;
+  --good-quiet: rgba(63, 185, 80, 0.14);
+  --warn: #d9a441;
+  --warn-quiet: rgba(217, 164, 65, 0.14);
+  --bad: #f0574d;
+  --bad-quiet: rgba(240, 87, 77, 0.14);
+  --info: #39b8cf;
+  --info-quiet: rgba(57, 184, 207, 0.14);
+
+  --series-1: #8c85ff;
+  --series-2: #39b8cf;
+  --series-3: #d9a441;
+  --series-4: #3fb950;
+  --series-5: #e069b0;
+  --series-6: #8b919b;
+
+  --grid-line: rgba(255, 255, 255, 0.055);
+
+  --shadow-pop: 0 1px 1px rgba(0, 0, 0, 0.5), 0 8px 24px -8px rgba(0, 0, 0, 0.7);
+  --shadow-overlay: 0 1px 1px rgba(0, 0, 0, 0.6),
+    0 16px 48px -12px rgba(0, 0, 0, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #0a0b0d;
+    --canvas-inset: #08090b;
+    --surface: #101216;
+    --surface-2: #16191e;
+    --surface-3: #1d2026;
+    --surface-inverse: #edeef1;
+
+    --line: rgba(255, 255, 255, 0.07);
+    --line-strong: rgba(255, 255, 255, 0.13);
+    --line-accent: rgba(140, 133, 255, 0.45);
+
+    --text: #edeef1;
+    --text-2: #9ba1ab;
+    --text-3: #6e7480;
+    --text-4: #4b5058;
+    --text-inverse: #0a0b0d;
+
+    --edge: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+    --accent: #8c85ff;
+    --accent-hover: #a49eff;
+    --accent-quiet: rgba(140, 133, 255, 0.13);
+    --accent-quieter: rgba(140, 133, 255, 0.07);
+    --accent-text: #a49eff;
+
+    --good: #3fb950;
+    --good-quiet: rgba(63, 185, 80, 0.14);
+    --warn: #d9a441;
+    --warn-quiet: rgba(217, 164, 65, 0.14);
+    --bad: #f0574d;
+    --bad-quiet: rgba(240, 87, 77, 0.14);
+    --info: #39b8cf;
+    --info-quiet: rgba(57, 184, 207, 0.14);
+
+    --series-1: #8c85ff;
+    --series-2: #39b8cf;
+    --series-3: #d9a441;
+    --series-4: #3fb950;
+    --series-5: #e069b0;
+    --series-6: #8b919b;
+
+    --grid-line: rgba(255, 255, 255, 0.055);
+
+    --shadow-pop: 0 1px 1px rgba(0, 0, 0, 0.5),
+      0 8px 24px -8px rgba(0, 0, 0, 0.7);
+    --shadow-overlay: 0 1px 1px rgba(0, 0, 0, 0.6),
+      0 16px 48px -12px rgba(0, 0, 0, 0.8);
+  }
+}

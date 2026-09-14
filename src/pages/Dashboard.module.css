@@ -1,0 +1,291 @@
+/* Dashboard */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* ===== Readings row ===============================================
+   One panel divided by hairlines rather than four separate cards. Four cards
+   with four borders and four gaps make the eye do work; a single strip reads
+   as one instrument with four dials. */
+
+.readings {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  overflow: hidden;
+}
+
+.reading {
+  padding: var(--sp-4) var(--sp-5);
+  min-width: 0;
+}
+
+.reading + .reading {
+  border-left: 1px solid var(--line);
+}
+
+.readingLink {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+.readingLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ===== Two-column body ============================================ */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: start;
+}
+
+/* ===== Leaderboard ================================================
+   Slowest components. The list is the point of the page: it is the only
+   surface that answers "what should I look at first". */
+
+.board {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr) 4.5rem 3.25rem;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--line);
+  color: inherit;
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.row:first-child {
+  border-top: none;
+}
+
+.row:hover {
+  background: var(--surface-2);
+}
+
+.rank {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--text-4);
+  text-align: right;
+}
+
+.rowIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.rowName {
+  font-size: var(--text-body);
+  font-weight: 480;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  margin-top: 1px;
+}
+
+.rowTime {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-2);
+  text-align: right;
+}
+
+.rowScore {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  justify-content: flex-end;
+}
+
+.rowScoreValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ===== Destinations ===============================================
+   Replaces the old "Welcome to…" block. A dashboard's secondary job is
+   routing you onward, so this says where to go, not what the app is. */
+
+.routes {
+  display: flex;
+  flex-direction: column;
+}
+
+.route {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--line);
+  color: inherit;
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.route:first-child {
+  border-top: none;
+}
+
+.route:hover {
+  background: var(--surface-2);
+}
+
+.routeIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease);
+}
+
+.route:hover .routeIcon {
+  color: var(--accent);
+  border-color: var(--line-accent);
+}
+
+.routeText {
+  min-width: 0;
+  flex: 1;
+}
+
+.routeName {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.routeArrow {
+  color: var(--text-4);
+  opacity: 0;
+  translate: -3px 0;
+  transition: opacity var(--dur-2) var(--ease),
+    translate var(--dur-2) var(--ease);
+}
+
+.route:hover .routeArrow {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.routeDescription {
+  margin-top: 1px;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
+}
+
+/* ===== Empty state ================================================ */
+
+.blank {
+  padding: var(--sp-10) var(--sp-6);
+  text-align: center;
+}
+
+.blankIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--sp-4);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+.blankTitle {
+  font-size: var(--text-heading);
+  font-weight: 560;
+  color: var(--text);
+}
+
+.blankBody {
+  margin: var(--sp-2) auto 0;
+  max-width: 46ch;
+  font-size: var(--text-prose);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+.blankActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
+
+/* ===== Responsive ================================================= */
+
+@media (max-width: 1100px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .readings {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reading:nth-child(3) {
+    border-left: none;
+  }
+
+  .reading:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 520px) {
+  .readings {
+    grid-template-columns: 1fr;
+  }
+
+  .reading + .reading {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .row {
+    grid-template-columns: 1.4rem minmax(0, 1fr) 3.5rem;
+  }
+
+  .rowTime {
+    display: none;
+  }
+}

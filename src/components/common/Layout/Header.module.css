@@ -1,315 +1,230 @@
-/* Header.module.css */
+/* Header — fixed-height control strip */
 
 .header {
   position: sticky;
   top: 0;
-  height: 64px;
-  background: var(--background-primary);
-  border-bottom: 1px solid var(--border-color);
+  z-index: var(--z-header);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--spacing-6);
-  z-index: var(--z-header);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
+  gap: var(--sp-4);
+  height: var(--header-h);
+  flex: none;
+  padding: 0 var(--sp-4);
+  background: color-mix(in srgb, var(--canvas) 82%, transparent);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--line);
 }
 
-/* Left Section */
-.left {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-4);
-}
-
-.menuToggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-primary);
-  padding: var(--spacing-2);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-}
-
-.menuToggle:hover {
-  background: var(--background-secondary);
-}
-
-.menuToggle:active {
-  transform: scale(0.95);
-}
-
-/* Breadcrumb */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: 0.9375rem;
-}
-
-.breadcrumbHome {
-  color: var(--text-secondary);
-  transition: color var(--transition-fast);
-  cursor: pointer;
-}
-
-.breadcrumbHome:hover {
-  color: var(--color-primary);
-}
-
-.breadcrumbSeparator {
-  color: var(--border-color);
-}
-
-.breadcrumbCurrent {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-/* Right Section */
+.left,
 .right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
+  min-width: 0;
 }
 
-/* Monitoring Toggle */
-.monitoringToggle {
-  display: flex;
-  align-items: center;
+.left {
+  gap: var(--sp-3);
 }
 
-.toggleButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-4);
-  background: var(--background-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
+.right {
+  gap: var(--sp-2);
 }
 
-.toggleButton:hover {
-  background: var(--background-tertiary);
-  border-color: var(--text-secondary);
-}
+/* ===== Icon buttons ===============================================
+   32px hit target, 16px glyph. Hover is a surface change only — an icon
+   button that also changes colour on hover reads as two states at once. */
 
-.toggleButton.active {
-  background: linear-gradient(
-    135deg,
-    var(--color-success-light),
-    var(--color-success)
-  );
-  border-color: var(--color-success);
-  color: white;
-  box-shadow: 0 0 12px var(--color-success-light);
-}
-
-.toggleIcon {
-  font-size: 0.75rem;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.toggleButton:not(.active) .toggleIcon {
-  animation: none;
-}
-
-.toggleLabel {
-  font-weight: 600;
-}
-
-/* Theme Toggle */
-.themeToggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--background-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 1.25rem;
-  transition: background var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.themeToggle:hover {
-  background: var(--background-tertiary);
-  border-color: var(--color-primary);
-}
-
-.themeToggle:active {
-  transform: scale(0.95);
-}
-
-/* Alert Bell */
-.alertBell {
+.railToggle,
+.iconButton {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid var(--border-color);
-  background: var(--background-secondary);
-  color: var(--text-secondary);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--r-md);
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
 }
 
-.alertBell:hover {
-  background: var(--background-tertiary);
-  border-color: var(--color-primary);
-  color: var(--color-error);
+.railToggle:hover,
+.iconButton:hover {
+  color: var(--text);
+  background: var(--surface-2);
 }
 
-.alertBell.noAlerts {
-  color: var(--text-tertiary);
-  opacity: 0.7;
-}
-
-.alertBell.noAlerts:hover {
-  opacity: 1;
-  color: var(--text-secondary);
-}
-
-.alertBell:active {
-  transform: scale(0.95);
-}
-
-.bellIcon {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.alertBadge {
+.badge {
   position: absolute;
-  top: -0.25rem;
-  right: -0.25rem;
+  top: 1px;
+  right: 1px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-full);
+  background: var(--bad);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  border: 2px solid var(--canvas);
+}
+
+/* ===== Breadcrumb ================================================= */
+
+.crumbs {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 1.125rem;
-  height: 1.125rem;
-  padding: 0 0.25rem;
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: white;
-  background: var(--color-error);
-  border-radius: var(--radius-full);
-  border: 2px solid var(--color-surface);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  gap: var(--sp-1);
+  font-size: var(--text-body);
+  min-width: 0;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+.crumbRoot {
+  color: var(--text-3);
+  white-space: nowrap;
 }
 
-/* Last Update */
-.lastUpdate {
+.crumbSep {
+  color: var(--text-4);
+  flex: none;
+}
+
+.crumbCurrent {
+  color: var(--text);
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Monitoring control =========================================
+   The only control in the header with a border, because it is the only one
+   that changes what the application does. */
+
+.monitor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 28px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge);
+  color: var(--text-2);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
+}
+
+.monitor:hover {
+  color: var(--text);
+  border-color: var(--text-4);
+}
+
+.monitorLive {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  background: var(--good-quiet);
+}
+
+.monitorLive:hover {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 60%, transparent);
+}
+
+.monitorLabel {
+  letter-spacing: var(--tracking-normal);
+}
+
+/* ===== Divider / clock ============================================ */
+
+.divider {
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+  margin: 0 var(--sp-1);
+}
+
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.clockIcon {
+  color: var(--text-4);
+}
+
+/* ===== Theme switch ===============================================
+   Segmented, so the current mode is legible without opening anything. */
+
+.themeSwitch {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0;
-  padding: var(--spacing-2) var(--spacing-3);
-  background: var(--background-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
 }
 
-.updateLabel {
-  font-size: 0.6875rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
+.themeOption {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 22px;
+  border-radius: var(--r-sm);
+  color: var(--text-4);
+  transition: color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease);
 }
 
-.updateTime {
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+.themeOption:hover {
+  color: var(--text-2);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .menuToggle {
-    display: flex;
+.themeActive {
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--edge);
+}
+
+/* ===== Responsive ================================================= */
+
+@media (max-width: 900px) {
+  .clock,
+  .divider {
+    display: none;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .header {
-    padding: 0 var(--spacing-4);
+    padding: 0 var(--sp-3);
   }
 
-  .breadcrumbHome {
+  .monitorLabel {
     display: none;
   }
 
-  .breadcrumbSeparator {
+  .monitor {
+    padding: 0 var(--sp-2);
+  }
+
+  .crumbRoot,
+  .crumbSep {
     display: none;
-  }
-
-  .lastUpdate {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    padding: 0 var(--spacing-3);
-    height: 56px;
-  }
-
-  .right {
-    gap: var(--spacing-2);
-  }
-
-  .toggleLabel {
-    display: none;
-  }
-
-  .toggleButton {
-    padding: var(--spacing-2);
-    min-width: 40px;
-    justify-content: center;
-  }
-
-  .themeToggle {
-    width: 36px;
-    height: 36px;
-    font-size: 1.125rem;
-  }
-}
-
-/* Animations */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
   }
 }

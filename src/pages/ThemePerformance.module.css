@@ -1,303 +1,265 @@
-/* ThemePerformance.module.css */
+/* Theme Performance */
 
-.container {
+.page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-6);
+  gap: var(--sp-6);
 }
 
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-6);
-  flex-wrap: wrap;
+/* ===== Readings ================================================== */
+
+.readings {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  overflow: hidden;
 }
 
-.title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
+.reading {
+  padding: var(--sp-4) var(--sp-5);
+  min-width: 0;
 }
 
-.subtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-top: var(--spacing-2);
+.reading + .reading {
+  border-left: 1px solid var(--line);
 }
 
-.stats {
-  display: flex;
-  gap: var(--spacing-4);
+/* The approach name is text, not a figure, so it does not get the display
+   size the numeric readings use. */
+.reading:first-child [class*="metricValue"] {
+  font-size: var(--text-heading);
+  letter-spacing: var(--tracking-snug);
 }
 
-.statCard {
-  padding: var(--spacing-4);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  min-width: 160px;
+/* ===== Charts ==================================================== */
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-6);
+  align-items: start;
 }
 
-.statLabel {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: var(--spacing-2);
-}
+/* ===== Approaches ================================================
+   An accordion rather than a grid of cards: the comparison lives in the
+   aligned columns, and five cards of differing height destroy that alignment. */
 
-.statValue {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* Sections */
-.section {
+.approaches {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
 }
 
-.sectionTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+.approach {
+  border-top: 1px solid var(--line);
 }
 
-/* Charts */
-.chartsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: var(--spacing-6);
+.approach:first-child {
+  border-top: none;
 }
 
-.chartCard {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-6);
-}
-
-.chartTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-/* Approaches */
-.approachesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--spacing-4);
-}
-
-.approachCard {
-  padding: var(--spacing-5);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--border-color);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.approachCard:hover {
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.approachCard.selected {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.approachHeader {
+.approachHead {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-4);
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-5);
+  text-align: left;
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.approachHead:hover {
+  background: var(--surface-2);
+}
+
+.approachChevron {
+  flex: none;
+  color: var(--text-4);
+  transition: rotate var(--dur-2) var(--ease), color var(--dur-1) var(--ease);
+}
+
+.approachOpen .approachChevron {
+  rotate: 90deg;
+  color: var(--accent);
 }
 
 .approachName {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.ratingBadge {
-  padding: var(--spacing-1) var(--spacing-3);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
+.approachStats {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex: none;
+}
+
+.approachStat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.approachStatLabel {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 550;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--text-4);
 }
 
-.metrics {
+.approachBody {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-3);
-  padding: var(--spacing-4);
-  background: var(--background-tertiary);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-6);
+  padding: var(--sp-1) var(--sp-5) var(--sp-5) calc(var(--sp-5) + 25px);
+  animation: riseIn var(--dur-2) var(--ease);
 }
 
-.metric {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-}
-
-.metricLabel {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+.listLabel {
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
+  color: var(--text-3);
+  margin-bottom: var(--sp-2);
 }
 
-.metricValue {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--text-primary);
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
 }
 
-.details {
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+.listIconGood {
+  flex: none;
+  margin-top: 3px;
+  color: var(--good);
+}
+
+.listIconBad {
+  flex: none;
+  margin-top: 3px;
+  color: var(--text-4);
+}
+
+/* ===== Practices ================================================= */
+
+.practices {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-4);
-  padding-top: var(--spacing-4);
-  border-top: 1px solid var(--border-color);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-5) var(--sp-8);
 }
 
-.detailSection {
+.practice {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-}
-
-.detailTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-
-.detailList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-}
-
-.detailList li {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-/* Best Practices */
-.practicesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-4);
-}
-
-.practiceCard {
-  padding: var(--spacing-5);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-3);
-  transition: all var(--transition-fast);
-}
-
-.practiceCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-width: 0;
 }
 
 .practiceIcon {
-  font-size: 2.5rem;
-  margin-bottom: var(--spacing-2);
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+.practiceText {
+  min-width: 0;
+}
+
+.practiceHead {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
 }
 
 .practiceTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 550;
+  color: var(--text);
 }
 
-.practiceDescription {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  flex: 1;
+.practiceBody {
+  margin-top: 3px;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
 }
 
-.impactBadge {
-  align-self: flex-start;
-  padding: var(--spacing-1) var(--spacing-3);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* ===== Responsive ================================================ */
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .chartsGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 1100px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .details {
-    grid-template-columns: 1fr;
+  .approachStats {
+    gap: var(--sp-4);
   }
 }
 
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
+@media (max-width: 900px) {
+  .readings {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .stats {
-    width: 100%;
-    flex-direction: column;
+  .reading:nth-child(3) {
+    border-left: none;
   }
 
-  .statCard {
-    width: 100%;
+  .reading:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
   }
 
-  .approachesGrid {
+  .practices,
+  .approachBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Timings collapse before the badge does — the rating is the summary. */
+  .approachStats {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .readings {
     grid-template-columns: 1fr;
   }
 
-  .metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .practicesGrid {
-    grid-template-columns: 1fr;
+  .reading + .reading {
+    border-left: none;
+    border-top: 1px solid var(--line);
   }
 }
