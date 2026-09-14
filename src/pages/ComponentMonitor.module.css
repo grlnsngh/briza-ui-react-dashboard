@@ -1,276 +1,182 @@
-/* ComponentMonitor.module.css */
+/* Component Monitor */
 
-.container {
+.page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-6);
+  gap: var(--sp-6);
 }
 
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-6);
-  flex-wrap: wrap;
-}
+/* ===== Readings ================================================== */
 
-.title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.subtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-top: var(--spacing-2);
-}
-
-.stats {
-  display: flex;
-  gap: var(--spacing-4);
-}
-
-.statCard {
-  padding: var(--spacing-4);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  min-width: 140px;
-}
-
-.statLabel {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: var(--spacing-2);
-}
-
-.statValue {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* Controls */
-.controls {
-  display: flex;
-  gap: var(--spacing-4);
-  align-items: center;
-}
-
-.searchInput {
-  flex: 1;
-  max-width: 400px;
-  padding: var(--spacing-3) var(--spacing-4);
-  font-size: 0.9375rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  transition: all var(--transition-fast);
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.searchInput::placeholder {
-  color: var(--text-secondary);
-}
-
-/* Charts */
-.chartsGrid {
+.readings {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: var(--spacing-6);
-}
-
-.chartCard {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-6);
-}
-
-.chartTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-/* Table */
-.tableCard {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
   overflow: hidden;
 }
 
-.tableTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  padding: var(--spacing-6);
-  padding-bottom: var(--spacing-4);
-  margin: 0;
+.reading {
+  padding: var(--sp-4) var(--sp-5);
+  min-width: 0;
 }
 
-.tableWrapper {
-  overflow-x: auto;
+.reading + .reading {
+  border-left: 1px solid var(--line);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
+/* ===== Charts ==================================================== */
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-6);
+  align-items: start;
 }
 
-.table thead {
-  background: var(--background-tertiary);
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.table th {
-  padding: var(--spacing-4);
-  text-align: left;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  user-select: none;
-  transition: all var(--transition-fast);
-}
-
-.table th:hover {
-  background: var(--background-hover);
-  color: var(--text-primary);
-}
-
-.table tbody tr {
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color var(--transition-fast);
-}
-
-.table tbody tr:hover {
-  background: var(--background-hover);
-}
-
-.table tbody tr.selectedRow {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.table td {
-  padding: var(--spacing-4);
-  font-size: 0.9375rem;
-  color: var(--text-primary);
-}
-
-.componentName {
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-.scoreBadge {
-  display: inline-block;
-  padding: var(--spacing-1) var(--spacing-3);
-  border-radius: var(--radius-full);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  min-width: 50px;
-  text-align: center;
-}
-
-.viewButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-primary);
-  background: transparent;
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.viewButton:hover {
-  background: var(--color-primary);
-  color: white;
-}
-
-.viewButton:active {
-  transform: scale(0.98);
-}
-
-/* Empty State */
-.emptyState {
+.chartPlaceholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-8);
+  gap: var(--sp-2);
+  min-height: 240px;
+  font-size: var(--text-meta);
+  color: var(--text-3);
   text-align: center;
 }
 
-.emptyStateIcon {
-  font-size: 4rem;
-  opacity: 0.3;
-  margin-bottom: var(--spacing-4);
+/* ===== Table ===================================================== */
+
+.tableScroll {
+  composes: tableScroll from "../styles/table.module.css";
 }
 
-.emptyStateText {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-2);
+.table {
+  composes: table from "../styles/table.module.css";
 }
 
-.emptyStateSubtext {
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
+.sortButton {
+  composes: sortButton from "../styles/table.module.css";
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .chartsGrid {
+.sortActive {
+  composes: sortActive from "../styles/table.module.css";
+}
+
+.sortIcon {
+  composes: sortIcon from "../styles/table.module.css";
+}
+
+.sortIconIdle {
+  composes: sortIconIdle from "../styles/table.module.css";
+}
+
+.right {
+  composes: right from "../styles/table.module.css";
+}
+
+.mono {
+  composes: mono from "../styles/table.module.css";
+}
+
+.name {
+  composes: name from "../styles/table.module.css";
+}
+
+.search {
+  composes: search from "../styles/table.module.css";
+}
+
+.searchIcon {
+  composes: searchIcon from "../styles/table.module.css";
+}
+
+.searchInput {
+  composes: searchInput from "../styles/table.module.css";
+}
+
+.empty {
+  composes: empty from "../styles/table.module.css";
+}
+
+.emptyTitle {
+  composes: emptyTitle from "../styles/table.module.css";
+}
+
+.emptyBody {
+  composes: emptyBody from "../styles/table.module.css";
+}
+
+/* Rows are selectable here, which the shared table does not assume. */
+.table tbody tr {
+  cursor: pointer;
+}
+
+.rowSelected {
+  background: var(--accent-quieter);
+}
+
+.rowSelected td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.rowSelected:hover {
+  background: var(--accent-quiet);
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  justify-content: flex-end;
+  min-width: 88px;
+}
+
+.scoreValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  color: var(--text);
+  min-width: 1.8em;
+  text-align: right;
+}
+
+/* ===== Responsive ================================================ */
+
+@media (max-width: 1100px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .readings {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reading:nth-child(3) {
+    border-left: none;
+  }
+
+  .reading:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 520px) {
+  .readings {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-  }
-
-  .stats {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .statCard {
-    width: 100%;
+  .reading + .reading {
+    border-left: none;
+    border-top: 1px solid var(--line);
   }
 
   .searchInput {
-    max-width: 100%;
-  }
-
-  .table {
-    font-size: 0.875rem;
-  }
-
-  .table th,
-  .table td {
-    padding: var(--spacing-2) var(--spacing-3);
+    width: 110px;
   }
 }

@@ -20,7 +20,7 @@ interface LoadingSkeletonProps {
 export default function LoadingSkeleton({
   width = "100%",
   height = "20px",
-  borderRadius = "var(--radius-md)",
+  borderRadius = "var(--r-sm)",
   className = "",
 }: LoadingSkeletonProps) {
   return (

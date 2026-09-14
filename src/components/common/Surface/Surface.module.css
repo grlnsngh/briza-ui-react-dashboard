@@ -1,0 +1,282 @@
+/* Shared surfaces: page header, panel, metric, badge */
+
+/* ===== Page header ================================================ */
+
+.pageHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-6);
+  padding-bottom: var(--sp-5);
+  margin-bottom: var(--sp-6);
+  border-bottom: 1px solid var(--line);
+}
+
+.pageHeadText {
+  min-width: 0;
+}
+
+.pageEyebrow {
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: var(--sp-2);
+}
+
+.pageTitle {
+  font-size: var(--text-title);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  color: var(--text);
+}
+
+.pageDescription {
+  margin-top: var(--sp-2);
+  max-width: 68ch;
+  font-size: var(--text-prose);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+.pageActions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+}
+
+/* ===== Panel ====================================================== */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  min-width: 0;
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.panelHeadText {
+  min-width: 0;
+}
+
+.panelTitle {
+  font-size: var(--text-heading);
+  font-weight: 560;
+  letter-spacing: var(--tracking-snug);
+  color: var(--text);
+}
+
+.panelDescription {
+  margin-top: 3px;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
+}
+
+.panelActions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+}
+
+.panelBody {
+  padding: var(--sp-5);
+}
+
+.panelBodyFlush {
+  padding: 0;
+}
+
+/* ===== Metric =====================================================
+   Baseline-aligned label, value and context. The value dominates by size,
+   not by weight — 600 at 32px is already emphatic and 700 starts to smear. */
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.metricHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.metricLabel {
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metricAside {
+  flex: none;
+  font-size: var(--text-meta);
+  color: var(--text-3);
+}
+
+.metricValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.28em;
+  font-size: var(--metric-md);
+  font-weight: 550;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.metricValueLg {
+  font-size: var(--metric-lg);
+}
+
+.metricUnit {
+  font-size: 0.5em;
+  font-weight: 500;
+  letter-spacing: var(--tracking-normal);
+  color: var(--text-3);
+}
+
+.metricContext {
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
+}
+
+.valueGood {
+  color: var(--good);
+}
+.valueWarn {
+  color: var(--warn);
+}
+.valueBad {
+  color: var(--bad);
+}
+
+/* ===== Tones ====================================================== */
+
+.toneNeutral {
+  --tone: var(--text-2);
+  --tone-quiet: var(--surface-2);
+}
+.toneGood {
+  --tone: var(--good);
+  --tone-quiet: var(--good-quiet);
+}
+.toneWarn {
+  --tone: var(--warn);
+  --tone-quiet: var(--warn-quiet);
+}
+.toneBad {
+  --tone: var(--bad);
+  --tone-quiet: var(--bad-quiet);
+}
+.toneInfo {
+  --tone: var(--info);
+  --tone-quiet: var(--info-quiet);
+}
+.toneAccent {
+  --tone: var(--accent);
+  --tone-quiet: var(--accent-quiet);
+}
+
+/* ===== Badge ====================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  height: 19px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-sm);
+  background: var(--tone-quiet);
+  color: var(--tone);
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-normal);
+  white-space: nowrap;
+}
+
+.toneNeutral.badge {
+  color: var(--text-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* ===== Status dot ================================================= */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--tone);
+  white-space: nowrap;
+}
+
+.statusDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--tone);
+}
+
+.statusPulse {
+  animation: breathe 2.4s var(--ease) infinite;
+}
+
+/* ===== Score bar ==================================================
+   4px track. Thin enough to sit inside a table row without adding height. */
+
+.scoreBar {
+  display: block;
+  width: 100%;
+  min-width: 48px;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.scoreFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--tone);
+  transition: inline-size var(--dur-3) var(--ease);
+}
+
+/* ===== Responsive ================================================= */
+
+@media (max-width: 640px) {
+  .pageHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-4);
+  }
+
+  .panelHead,
+  .panelBody {
+    padding: var(--sp-4);
+  }
+}

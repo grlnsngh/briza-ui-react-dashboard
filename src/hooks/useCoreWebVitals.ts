@@ -95,13 +95,33 @@ export function useCoreWebVitals({
   const [fcp, setFcp] = useState<WebVitalMetric | null>(null);
   const [ttfb, setTtfb] = useState<WebVitalMetric | null>(null);
   const [inp, setInp] = useState<WebVitalMetric | null>(null);
-  const [isMonitoring, setIsMonitoring] = useState(enableRealtime);
+  // `enableRealtime` is the source of truth. `startMonitoring`/`stopMonitoring`
+  // layer an imperative override on top of it, and any change to the prop drops
+  // that override so the caller's flag takes over again. Seeding state from the
+  // prop once is what made the header toggle a no-op: the hook never saw it move.
+  const [monitoringOverride, setMonitoringOverride] = useState<boolean | null>(
+    null
+  );
+  const [lastEnableRealtime, setLastEnableRealtime] = useState(enableRealtime);
+
+  if (lastEnableRealtime !== enableRealtime) {
+    setLastEnableRealtime(enableRealtime);
+    setMonitoringOverride(null);
+  }
+
+  const isMonitoring = monitoringOverride ?? enableRealtime;
 
   const metricsRef = useRef<WebVitalsData | null>(null);
   const reportTimerRef = useRef<number | undefined>(undefined);
   const latestMetricsRef = useRef<
     Pick<WebVitalsData, "lcp" | "fid" | "cls" | "fcp" | "ttfb" | "inp">
   >({ lcp, fid, cls, fcp, ttfb, inp });
+
+  // Whether a monitoring session is currently running. Read by the web-vitals
+  // callbacks, which outlive any single session (see the subscription effect).
+  const isCollectingRef = useRef(false);
+  const hasSubscribedRef = useRef(false);
+  const reportRef = useRef<(metric: Metric) => void>(() => {});
 
   // Convert web-vitals Metric to WebVitalMetric
   const convertMetric = useCallback((metric: Metric): WebVitalMetric => {
@@ -147,18 +167,16 @@ export function useCoreWebVitals({
     [onMetricUpdate]
   );
 
-  // Start monitoring
+  // Start monitoring, overriding `enableRealtime` until the prop next changes
   const startMonitoring = useCallback(() => {
-    setIsMonitoring(true);
+    setMonitoringOverride(true);
   }, []);
 
-  // Stop monitoring
+  // Stop monitoring, overriding `enableRealtime` until the prop next changes.
+  // The report timer belongs to its own effect, whose cleanup runs as soon as
+  // `isMonitoring` flips — clearing it here too would fight that owner.
   const stopMonitoring = useCallback(() => {
-    setIsMonitoring(false);
-    if (reportTimerRef.current) {
-      window.clearInterval(reportTimerRef.current);
-      reportTimerRef.current = undefined;
-    }
+    setMonitoringOverride(false);
   }, []);
 
   // Reset metrics
@@ -171,43 +189,45 @@ export function useCoreWebVitals({
     metricsRef.current = null;
   }, []);
 
+  // Keep the reporter the web-vitals callbacks reach for current. Declared
+  // ahead of the subscription effect so it is already populated by the time the
+  // observers below are attached.
+  useEffect(() => {
+    reportRef.current = (metric: Metric) => {
+      updateMetric(convertMetric(metric));
+    };
+  }, [convertMetric, updateMetric]);
+
   // Set up Web Vitals monitoring
   useEffect(() => {
     if (!isMonitoring) return;
 
-    // LCP - Largest Contentful Paint
-    onLCP((metric) => {
-      const webVital = convertMetric(metric);
-      updateMetric(webVital);
-    });
+    isCollectingRef.current = true;
 
-    // CLS - Cumulative Layout Shift
-    onCLS((metric) => {
-      const webVital = convertMetric(metric);
-      updateMetric(webVital);
-    });
+    // web-vitals v4+ hands back no unsubscribe, and calling on*() again would
+    // stack another observer — and another metric id — onto the page for every
+    // toggle. So the observers are attached once, on the first activation, and
+    // `isCollectingRef` connects and disconnects them from then on: the cleanup
+    // below detaches collection, re-enabling reattaches it.
+    if (!hasSubscribedRef.current) {
+      hasSubscribedRef.current = true;
 
-    // FCP - First Contentful Paint
-    onFCP((metric) => {
-      const webVital = convertMetric(metric);
-      updateMetric(webVital);
-    });
+      const report = (metric: Metric) => {
+        if (!isCollectingRef.current) return;
+        reportRef.current(metric);
+      };
 
-    // TTFB - Time to First Byte
-    onTTFB((metric) => {
-      const webVital = convertMetric(metric);
-      updateMetric(webVital);
-    });
+      onLCP(report); // Largest Contentful Paint
+      onCLS(report); // Cumulative Layout Shift
+      onFCP(report); // First Contentful Paint
+      onTTFB(report); // Time to First Byte
+      onINP(report); // Interaction to Next Paint
+    }
 
-    // INP - Interaction to Next Paint
-    onINP((metric) => {
-      const webVital = convertMetric(metric);
-      updateMetric(webVital);
-    });
-
-    // Note: web-vitals v4+ doesn't return cleanup functions
-    // Metrics are automatically collected once per page load
-  }, [isMonitoring, convertMetric, updateMetric]);
+    return () => {
+      isCollectingRef.current = false;
+    };
+  }, [isMonitoring]);
 
   // Latest measurements for the report timer below. The timer must not depend
   // on them, so they reach it through a ref instead of a closure.

@@ -1,7 +1,9 @@
 /**
- * PerformanceBarChart Component
+ * PerformanceBarChart
  *
- * Bar chart for comparing performance metrics across components
+ * Comparison across components. Bars are capped at the top only — a rounded
+ * foot lifts the bar off its own baseline and makes short bars read as
+ * floating.
  */
 
 import {
@@ -15,10 +17,14 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { CHART_COLORS } from "../../utils/constants";
+import {
+  SERIES,
+  axisDefaults,
+  gridDefaults,
+  cursorDefaults,
+} from "./chartTheme";
+import { ChartTooltip, ChartLegend } from "./ChartFrame";
 import styles from "./Charts.module.css";
-
-const COLORS = Object.values(CHART_COLORS);
 
 interface DataPoint {
   name: string;
@@ -39,71 +45,78 @@ interface PerformanceBarChartProps {
   showLegend?: boolean;
   colorByValue?: boolean;
   getBarColor?: (value: number) => string;
+  /** Formats values in the tooltip. Defaults to the raw value. */
+  valueFormatter?: (value: number | string) => string;
 }
 
 export default function PerformanceBarChart({
   data,
   bars,
-  height = 300,
-  xAxisLabel,
+  height = 260,
   yAxisLabel,
   showGrid = true,
-  showLegend = true,
+  showLegend = false,
   colorByValue = false,
   getBarColor,
+  valueFormatter,
 }: PerformanceBarChartProps) {
+  if (!data.length) {
+    return <div className={styles.chartEmpty}>No data to plot</div>;
+  }
+
+  // Long component names on a categorical axis will collide. Rotating them is
+  // the usual fix and it makes them slower to read; truncating keeps the axis
+  // horizontal, and the full name is a hover away in the tooltip.
+  //
+  // The budget is derived from the number of bars rather than a fixed length,
+  // because ten bars share the same width that four would otherwise each get.
+  const maxChars = data.length > 8 ? 6 : data.length > 5 ? 9 : 14;
+
   return (
     <div className={styles.chartContainer}>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart
           data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 4, right: 8, left: yAxisLabel ? 4 : -18, bottom: 0 }}
+          barCategoryGap="28%"
         >
-          {showGrid && (
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-          )}
+          {showGrid && <CartesianGrid {...gridDefaults} />}
+
           <XAxis
             dataKey="name"
-            stroke="var(--text-secondary)"
-            angle={-45}
-            textAnchor="end"
-            height={80}
-            label={
-              xAxisLabel
-                ? { value: xAxisLabel, position: "insideBottom", offset: -5 }
-                : undefined
+            {...axisDefaults}
+            interval={0}
+            tickMargin={8}
+            tickFormatter={(value: string) =>
+              value.length > maxChars ? `${value.slice(0, maxChars - 1)}…` : value
             }
           />
-          <YAxis
-            stroke="var(--text-secondary)"
-            label={
-              yAxisLabel
-                ? { value: yAxisLabel, angle: -90, position: "insideLeft" }
-                : undefined
-            }
-          />
+
+          <YAxis {...axisDefaults} width={40} />
+
           <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--background-secondary)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "var(--radius-md)",
-              color: "var(--text-primary)",
-            }}
+            cursor={cursorDefaults}
+            content={<ChartTooltip valueFormatter={valueFormatter} />}
           />
-          {showLegend && <Legend />}
+
+          {showLegend && bars.length > 1 && <Legend content={<ChartLegend />} />}
+
           {bars.map((bar, index) => (
             <Bar
               key={bar.dataKey}
               dataKey={bar.dataKey}
               name={bar.name}
-              fill={bar.color || COLORS[index % COLORS.length]}
+              fill={bar.color || SERIES[index % SERIES.length]}
+              radius={[3, 3, 0, 0]}
+              maxBarSize={44}
+              isAnimationActive={false}
             >
               {colorByValue &&
                 getBarColor &&
-                data.map((entry, idx) => (
+                data.map((entry, cellIndex) => (
                   <Cell
-                    key={`cell-${idx}`}
-                    fill={getBarColor(entry[bar.dataKey] as number)}
+                    key={cellIndex}
+                    fill={getBarColor(Number(entry[bar.dataKey]))}
                   />
                 ))}
             </Bar>

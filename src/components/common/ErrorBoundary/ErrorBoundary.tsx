@@ -107,7 +107,19 @@ export class ErrorBoundary extends Component<
       return (
         <div className={styles.errorBoundary}>
           <div className={styles.errorContent}>
-            <div className={styles.errorIcon}>⚠️</div>
+            <div className={styles.errorIcon}>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10.7 4.2 2.9 17.5a1.5 1.5 0 001.3 2.3h15.6a1.5 1.5 0 001.3-2.3L13.3 4.2a1.5 1.5 0 00-2.6 0zM12 9.2v4M12 16.6h.01" />
+              </svg>
+            </div>
             <h1 className={styles.errorTitle}>Oops! Something went wrong</h1>
             <p className={styles.errorMessage}>
               We're sorry, but something unexpected happened. The error has been

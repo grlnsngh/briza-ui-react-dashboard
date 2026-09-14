@@ -1,0 +1,296 @@
+/* Web Vitals */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* ===== Notice ==================================================== */
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--warn-quiet);
+  border: 1px solid color-mix(in srgb, var(--warn) 26%, transparent);
+  border-radius: var(--r-md);
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+.noticeIcon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--warn);
+}
+
+.noticeTitle {
+  font-weight: 550;
+  color: var(--text);
+}
+
+/* ===== Summary ===================================================
+   The overall score sits in its own cell against a sunken ground, so it reads
+   as the headline rather than as a sixth metric card. */
+
+.summary {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  overflow: hidden;
+}
+
+.score {
+  padding: var(--sp-5);
+  background: var(--canvas-inset);
+  border-right: 1px solid var(--line);
+}
+
+.scoreLabel {
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.scoreValue {
+  margin-top: var(--sp-2);
+  font-size: 2.75rem;
+  font-weight: 550;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  color: var(--text);
+}
+
+.score-good {
+  color: var(--good);
+}
+.score-warn {
+  color: var(--warn);
+}
+.score-bad {
+  color: var(--bad);
+}
+.score-neutral,
+.score-info,
+.score-accent {
+  color: var(--text);
+}
+
+.scoreMeta {
+  margin-top: var(--sp-2);
+  font-size: var(--text-meta);
+  color: var(--text-3);
+}
+
+.summaryNote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-5);
+}
+
+.summaryNote p {
+  max-width: 62ch;
+  font-size: var(--text-prose);
+  line-height: var(--leading-snug);
+  color: var(--text-2);
+}
+
+/* ===== Vital cards ===============================================
+   Five metrics, so a 3+2 grid rather than an even split — the alternative
+   leaves a hole in a four-column layout. */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+
+.vital {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
+  min-width: 0;
+}
+
+.vitalHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.vitalNames {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vitalAbbr {
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  color: var(--text-3);
+}
+
+.vitalName {
+  font-size: var(--text-meta);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vitalValue {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  min-height: 28px;
+}
+
+.vitalNumber {
+  font-size: var(--metric-md);
+  font-weight: 550;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.value-good {
+  color: var(--good);
+}
+.value-warn {
+  color: var(--warn);
+}
+.value-bad {
+  color: var(--bad);
+}
+.value-neutral,
+.value-info,
+.value-accent {
+  color: var(--text);
+}
+
+.vitalAbsent {
+  color: var(--text-4);
+}
+
+/* The threshold travels with the value. A measurement with no budget beside
+   it cannot be judged, only read. */
+.vitalBudget {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--text-4);
+  white-space: nowrap;
+}
+
+.vitalMeaning {
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
+}
+
+/* ===== Glossary ================================================== */
+
+.glossary {
+  display: flex;
+  flex-direction: column;
+}
+
+.glossaryItem {
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.glossaryItem:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.glossaryItem:last-child {
+  padding-bottom: 0;
+}
+
+.glossaryTerm {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--text);
+  flex-wrap: wrap;
+}
+
+.glossaryAbbr {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  color: var(--accent-text);
+  min-width: 3.2em;
+}
+
+.glossaryBudget {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-4);
+}
+
+.glossaryBody {
+  margin-top: 2px;
+  margin-left: calc(3.2em + var(--sp-3));
+  max-width: 72ch;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
+}
+
+/* ===== Responsive ================================================ */
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .score {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .glossaryBody {
+    margin-left: 0;
+  }
+
+  .glossaryBudget {
+    margin-left: 0;
+  }
+}

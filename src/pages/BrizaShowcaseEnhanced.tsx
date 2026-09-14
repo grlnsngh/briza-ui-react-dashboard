@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { MonitoredComponent } from "../components/MonitoredComponent";
 import { ComponentLoadingIndicator } from "../components/common";
 import { BRIZA_UI_COMPONENTS_EXPECTED } from "../utils/constants";
-import styles from "./BrizaShowcase.module.css";
+import styles from "./BrizaShowcaseEnhanced.module.css";
 
 export default function BrizaShowcaseEnhanced() {
   const [buttonClicks, setButtonClicks] = useState(0);
@@ -89,22 +89,22 @@ export default function BrizaShowcaseEnhanced() {
 
       {/* Stress Test Controls */}
       <div className={styles.stressControls}>
-        <h2 className={styles.sectionTitle}>🧪 Stress Testing</h2>
+        <h2 className={styles.sectionTitle}>Stress testing</h2>
         <p className={styles.sectionDesc}>
           Generate performance data by triggering multiple renders
         </p>
         <div className={styles.buttonGroup}>
           <button onClick={handleStressTest} className={styles.stressButton}>
-            ⚡ 10 Re-renders
+            10 re-renders
           </button>
           <button onClick={handleRapidClicks} className={styles.stressButton}>
-            🔥 20 Rapid Clicks
+            20 rapid clicks
           </button>
           <button
             onClick={handleProgressAnimation}
             className={styles.stressButton}
           >
-            📊 Animate Progress
+            Animate progress
           </button>
         </div>
       </div>
@@ -394,7 +394,7 @@ export default function BrizaShowcaseEnhanced() {
             <h3 className={styles.componentTitle}>Alert</h3>
             <p className={styles.componentDesc}>Notification message</p>
             <div className={styles.componentDemo}>
-              <div className={styles.alert}>ℹ️ This is an alert message</div>
+              <div className={styles.alert}>This is an alert message</div>
             </div>
           </div>
         </MonitoredComponent>

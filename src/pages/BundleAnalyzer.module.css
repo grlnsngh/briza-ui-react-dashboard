@@ -1,270 +1,213 @@
-/* BundleAnalyzer.module.css */
+/* Bundle Analyzer */
 
-.container {
+.page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-6);
+  gap: var(--sp-6);
 }
 
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-6);
-  flex-wrap: wrap;
-}
+/* ===== Readings ================================================== */
 
-.title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.subtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-top: var(--spacing-2);
-}
-
-.stats {
-  display: flex;
-  gap: var(--spacing-4);
-}
-
-.statCard {
-  padding: var(--spacing-4);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  min-width: 140px;
-}
-
-.statLabel {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: var(--spacing-2);
-}
-
-.statValue {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* Sections */
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
-
-.sectionTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.card {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-6);
-}
-
-/* Table */
-.tableCard {
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+.readings {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--edge);
   overflow: hidden;
+}
+
+.reading {
+  padding: var(--sp-4) var(--sp-5);
+  min-width: 0;
+}
+
+.reading + .reading {
+  border-left: 1px solid var(--line);
+}
+
+/* ===== Table ===================================================== */
+
+.tableScroll {
+  composes: tableScroll from "../styles/table.module.css";
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
+  composes: table from "../styles/table.module.css";
 }
 
-.table thead {
-  background: var(--background-tertiary);
+.right {
+  composes: right from "../styles/table.module.css";
 }
 
-.table th {
-  padding: var(--spacing-4);
-  text-align: left;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+.mono {
+  composes: mono from "../styles/table.module.css";
+}
+
+.name {
+  composes: name from "../styles/table.module.css";
+}
+
+.table thead th {
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.table tbody tr {
-  border-top: 1px solid var(--border-color);
-  transition: background-color var(--transition-fast);
-}
-
-.table tbody tr:hover {
-  background: var(--background-hover);
-}
-
-.table td {
-  padding: var(--spacing-4);
-  font-size: 0.9375rem;
-  color: var(--text-primary);
-}
-
-.packageName {
-  font-weight: 600;
-  color: var(--color-primary);
-  font-family: var(--font-mono);
+  color: var(--text-3);
 }
 
 .version {
-  font-family: var(--font-mono);
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  color: var(--text-3);
 }
 
-.percentageBar {
-  position: relative;
-  height: 24px;
-  background: var(--background-tertiary);
-  border-radius: var(--radius-md);
+.shareCol {
+  width: 34%;
+  min-width: 180px;
+}
+
+/* Share bar plus its value. The bar is the comparison, the number is the
+   lookup — both, because a bar alone cannot be read precisely. */
+
+.share {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.shareTrack {
+  flex: 1;
+  min-width: 60px;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
   overflow: hidden;
 }
 
-.percentageFill {
-  position: absolute;
-  left: 0;
-  top: 0;
+.shareFill {
+  display: block;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--color-primary),
-    var(--color-primary-light)
-  );
-  transition: width var(--transition-normal);
+  border-radius: var(--r-full);
+  background: var(--accent);
 }
 
-.percentageText {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  z-index: 1;
+.shareValue {
+  flex: none;
+  min-width: 3.5em;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-2);
 }
 
-/* Suggestions */
-.suggestionsGrid {
+/* ===== Suggestions =============================================== */
+
+.suggestions {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-5) var(--sp-8);
 }
 
-.suggestionCard {
-  padding: var(--spacing-5);
-  background: var(--background-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  border-left-width: 4px;
-}
-
-.suggestionCard.success {
-  border-left-color: var(--color-success);
-}
-
-.suggestionCard.warning {
-  border-left-color: var(--color-warning);
-}
-
-.suggestionCard.info {
-  border-left-color: var(--color-info);
-}
-
-.suggestionHeader {
+.suggestion {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-3);
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-width: 0;
 }
 
 .suggestionIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+.tonegood {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 30%, transparent);
+  background: var(--good-quiet);
+}
+
+.tonewarn {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+  background: var(--warn-quiet);
+}
+
+.toneinfo {
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 30%, transparent);
+  background: var(--info-quiet);
+}
+
+.tonebad {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 30%, transparent);
+  background: var(--bad-quiet);
+}
+
+.toneneutral,
+.toneaccent {
+  color: var(--text-3);
+}
+
+.suggestionText {
+  min-width: 0;
+}
+
+.suggestionHead {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.suggestionCard.success .suggestionIcon {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-}
-
-.suggestionCard.warning .suggestionIcon {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
-}
-
-.suggestionCard.info .suggestionIcon {
-  background: rgba(6, 182, 212, 0.1);
-  color: var(--color-info);
+  gap: var(--sp-2);
+  flex-wrap: wrap;
 }
 
 .suggestionTitle {
-  flex: 1;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 550;
+  color: var(--text);
 }
 
-.impactBadge {
-  padding: var(--spacing-1) var(--spacing-3);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.suggestionBody {
+  margin-top: 3px;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
 }
 
-.suggestionDescription {
-  margin: 0;
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
+/* ===== Responsive ================================================ */
+
+@media (max-width: 900px) {
+  .readings {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reading:nth-child(3) {
+    border-left: none;
+  }
+
+  .reading:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .suggestions {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-  }
-
-  .stats {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .statCard {
-    width: 100%;
-  }
-
-  .suggestionsGrid {
+@media (max-width: 520px) {
+  .readings {
     grid-template-columns: 1fr;
+  }
+
+  .reading + .reading {
+    border-left: none;
+    border-top: 1px solid var(--line);
   }
 }

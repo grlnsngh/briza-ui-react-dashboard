@@ -1,0 +1,184 @@
+/**
+ * Shared data-table styles
+ *
+ * Page modules pull these in with `composes: … from "../styles/table.module.css"`,
+ * so every table in the app has the same row height, the same hairlines and the
+ * same sort affordance while each page keeps its own column widths.
+ *
+ * Design notes:
+ * - Header labels are uppercase 11px, so a header row never gets mistaken for
+ *   the first data row.
+ * - Numeric columns are right-aligned and set in mono. Right alignment is what
+ *   lets you compare magnitudes by eye without reading a single digit.
+ * - Rows carry a bottom hairline only. Full cell borders turn a table into a
+ *   spreadsheet, and nothing here is editable.
+ */
+
+.tableScroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.table {
+  width: 100%;
+  min-width: 520px;
+  font-size: var(--text-body);
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background-color var(--dur-1) var(--ease);
+}
+
+.table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+/* ===== Sort control ===============================================
+   The whole header cell is the target, not just the label. */
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--text-label);
+  font-weight: 560;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+  transition: color var(--dur-1) var(--ease);
+}
+
+.sortButton:hover {
+  color: var(--text);
+}
+
+.sortActive {
+  color: var(--text);
+}
+
+.sortIcon {
+  color: var(--accent);
+}
+
+/* Idle arrows stay present but nearly invisible, so the column does not
+   shift by an icon width the moment you sort it. */
+.sortIconIdle {
+  opacity: 0;
+  transition: opacity var(--dur-1) var(--ease);
+}
+
+.sortButton:hover .sortIconIdle {
+  opacity: 0.45;
+}
+
+/* ===== Cells ====================================================== */
+
+.right {
+  text-align: right;
+}
+
+.right .sortButton {
+  justify-content: flex-end;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+}
+
+.name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ===== Search ===================================================== */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 28px;
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  transition: border-color var(--dur-1) var(--ease);
+}
+
+.search:focus-within {
+  border-color: var(--accent);
+}
+
+.searchIcon {
+  flex: none;
+  color: var(--text-4);
+}
+
+.searchInput {
+  width: 150px;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: var(--text-meta);
+  color: var(--text);
+}
+
+.searchInput::placeholder {
+  color: var(--text-4);
+}
+
+/* Chrome draws its own clear affordance on search inputs; it does not match. */
+.searchInput::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* ===== Empty ====================================================== */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-10) var(--sp-6);
+  text-align: center;
+  color: var(--text-3);
+}
+
+.emptyTitle {
+  font-size: var(--text-body);
+  font-weight: 550;
+  color: var(--text);
+}
+
+.emptyBody {
+  max-width: 42ch;
+  font-size: var(--text-meta);
+  line-height: var(--leading-snug);
+  color: var(--text-3);
+}

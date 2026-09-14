@@ -17,7 +17,11 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Below the drawer breakpoint `isOpen` means "overlaying the content", so
+  // it must start closed there or the app opens behind a scrim.
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window === "undefined" || window.innerWidth > 1024
+  );
   const [alertPanelOpen, setAlertPanelOpen] = useState(false);
 
   // Performance alerts
@@ -44,8 +48,8 @@ export default function Layout({ children }: LayoutProps) {
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
       <div
-        className={`${styles.mainContainer} ${
-          !sidebarOpen ? styles.sidebarClosed : ""
+        className={`${styles.main} ${
+          sidebarOpen ? "" : styles.railCollapsed
         }`}
       >
         <Header
