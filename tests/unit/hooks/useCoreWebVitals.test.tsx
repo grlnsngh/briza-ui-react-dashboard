@@ -1,18 +1,30 @@
 /**
  * useCoreWebVitals Tests
  *
- * Regression coverage for the monitoring toggle. `isMonitoring` used to be
- * seeded from `enableRealtime` with `useState` and never resynchronised, so the
- * header's Monitoring switch moved the prop while the hook went on collecting
- * (or not collecting) whatever the very first render happened to see.
+ * Regression coverage for the two halves of the hook.
+ *
+ * Collection: `isMonitoring` used to be seeded from `enableRealtime` with
+ * `useState` and never resynchronised, so the header's Monitoring switch moved
+ * the prop while the hook went on collecting (or not collecting) whatever the
+ * very first render happened to see.
+ *
+ * Reporting: the effect that owns the report interval used to list every metric
+ * in its dependency array, so each incoming measurement tore the timer down and
+ * armed a fresh one. While vitals were still arriving faster than
+ * `reportInterval` the timer never survived long enough to fire, and the
+ * performance context was told nothing during exactly the window the reporting
+ * is there to cover.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, act } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { useCoreWebVitals } from "../../../src/hooks/useCoreWebVitals";
 import { PerformanceProvider } from "../../../src/contexts";
-import type { WebVitalMetric } from "../../../src/types/performance";
+import type {
+  WebVitalMetric,
+  WebVitalsData,
+} from "../../../src/types/performance";
 
 type VitalName = "LCP" | "CLS" | "FCP" | "TTFB" | "INP";
 type Reporter = (metric: unknown) => void;
@@ -50,16 +62,45 @@ vi.mock("web-vitals", () => ({
   onINP: vitals.onINP,
 }));
 
+// The hook destructures `updateWebVitals` off the actions object, so swapping
+// that one member is enough to count reports; the real provider, reducer and
+// state stay in place. A stable module-level spy on purpose: the reporting
+// effect depends on this function's identity, so wrapping it per render would
+// re-arm the very timer the tests below are watching.
+const updateWebVitals = vi.hoisted(() =>
+  vi.fn<(vitals: WebVitalsData) => void>()
+);
+
+vi.mock("../../../src/contexts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../src/contexts")>();
+
+  return {
+    ...actual,
+    usePerformanceActions: () => ({
+      ...actual.usePerformanceActions(),
+      updateWebVitals,
+    }),
+  };
+});
+
 const onMetricUpdate = vi.fn<(metric: WebVitalMetric) => void>();
+
+const REPORT_INTERVAL = 5000;
 
 let controls: {
   startMonitoring: () => void;
   stopMonitoring: () => void;
 };
 
-function Probe({ enableRealtime }: { enableRealtime: boolean }) {
+function Probe({
+  enableRealtime,
+  reportInterval,
+}: {
+  enableRealtime: boolean;
+  reportInterval?: number;
+}) {
   const { lcp, isMonitoring, startMonitoring, stopMonitoring } =
-    useCoreWebVitals({ enableRealtime, onMetricUpdate });
+    useCoreWebVitals({ enableRealtime, reportInterval, onMetricUpdate });
 
   controls = { startMonitoring, stopMonitoring };
 
@@ -197,5 +238,105 @@ describe("useCoreWebVitals", () => {
     // The observer outlives the component; it must not report into it.
     emit("LCP", 3200);
     expect(onMetricUpdate).not.toHaveBeenCalled();
+  });
+
+  // Collection fills the metric state; this interval is what forwards it to
+  // the performance context. On a timer, so these run on fake ones.
+  describe("reporting to the performance context", () => {
+    beforeEach(() => {
+      updateWebVitals.mockClear();
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    /** The vitals handed to the nth report. */
+    const report = (index: number): WebVitalsData =>
+      updateWebVitals.mock.calls[index][0];
+
+    it("reports on the interval while measurements keep arriving", () => {
+      render(
+        wrap(<Probe enableRealtime={true} reportInterval={REPORT_INTERVAL} />)
+      );
+
+      // 15s of continuous measurement: an LCP update every 100ms, 150 in all.
+      // Every one of them used to rebuild the 5s timer, so it never fired.
+      for (let step = 0; step < 150; step += 1) {
+        emit("LCP", 1000 + step);
+        act(() => {
+          vi.advanceTimersByTime(100);
+        });
+      }
+
+      expect(updateWebVitals).toHaveBeenCalledTimes(3);
+      // And the last report is not a snapshot from when the timer was armed.
+      expect(report(2).lcp?.value).toBe(1149);
+    });
+
+    it("carries the values current at each tick", () => {
+      render(
+        wrap(<Probe enableRealtime={true} reportInterval={REPORT_INTERVAL} />)
+      );
+
+      emit("LCP", 1000);
+      emit("CLS", 0.05);
+      act(() => {
+        vi.advanceTimersByTime(REPORT_INTERVAL);
+      });
+
+      emit("LCP", 4200);
+      emit("INP", 350);
+      act(() => {
+        vi.advanceTimersByTime(REPORT_INTERVAL);
+      });
+
+      expect(updateWebVitals).toHaveBeenCalledTimes(2);
+
+      expect(report(0).lcp?.value).toBe(1000);
+      expect(report(0).lcp?.rating).toBe("good");
+      expect(report(0).cls?.value).toBe(0.05);
+      expect(report(0).inp).toBeNull();
+      expect(report(0).overallScore).toBe(100);
+
+      expect(report(1).lcp?.value).toBe(4200);
+      expect(report(1).lcp?.rating).toBe("poor");
+      expect(report(1).cls?.value).toBe(0.05);
+      expect(report(1).inp?.value).toBe(350);
+      // LCP now scores 0, CLS still scores 100.
+      expect(report(1).overallScore).toBe(50);
+    });
+
+    it("arms nothing while monitoring is off", () => {
+      render(
+        wrap(<Probe enableRealtime={false} reportInterval={REPORT_INTERVAL} />)
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(REPORT_INTERVAL * 10);
+      });
+
+      expect(updateWebVitals).not.toHaveBeenCalled();
+    });
+
+    it("stops reporting once monitoring stops", () => {
+      render(
+        wrap(<Probe enableRealtime={true} reportInterval={REPORT_INTERVAL} />)
+      );
+
+      emit("LCP", 1000);
+      act(() => {
+        vi.advanceTimersByTime(REPORT_INTERVAL);
+      });
+      expect(updateWebVitals).toHaveBeenCalledTimes(1);
+
+      act(() => controls.stopMonitoring());
+      act(() => {
+        vi.advanceTimersByTime(REPORT_INTERVAL * 10);
+      });
+
+      expect(updateWebVitals).toHaveBeenCalledTimes(1);
+    });
   });
 });
